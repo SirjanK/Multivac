@@ -1,4 +1,4 @@
-from queue import LifoQueue
+from queue import Queue
 
 
 class Buffer:
@@ -10,7 +10,7 @@ class Buffer:
         """
         Initializes the buffer object with its own internal queue.
         """
-        self.queue = LifoQueue()
+        self.queue = Queue()
 
     def read(self):
         """
