@@ -1,8 +1,6 @@
 # Symphonica Ultima
 The first true intelligent agent.
 
-Author: Sirjan Kafle
-
 ## The Goal
 Generalized AI. 
 
@@ -10,4 +8,4 @@ Generalized AI.
 Agent that learns how to operate an Android phone.
 
 ## Results?
-TBD, project just started :)
+TBD, project just started
