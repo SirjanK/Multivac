@@ -15,7 +15,7 @@ class ActionBuffer(Buffer):
         super(ActionBuffer, self).__init__()
         self.time_manager = TimeManager.get_default_instance()
 
-    def enrich_element(self, queue_elem):
+    def enrich_element_from_queue(self, queue_elem):
         """
         Enrich an element to return to a client. Wrap into an Action object.
         :param queue_elem: element from the internal queue. Tuple of (x, y) coordinate.
