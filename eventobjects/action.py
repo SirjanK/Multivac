@@ -14,5 +14,5 @@ class Action:
         assert(len(click_coordinate) == 2, "Invalid number of coordinates.")
         assert(type(click_coordinate[0]) == float and type(click_coordinate[1]) == float, "Invalid type of coordinate.")
 
-        self.click_coordinates = click_coordinate
+        self.click_coordinate = click_coordinate
         self.timestamp = timestamp

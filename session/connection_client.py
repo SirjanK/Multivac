@@ -22,8 +22,7 @@ class ConnectionClient:
         assert(type(observation_delta) == float, "Invalid type for the observation_delta.")
         self.action_buffer = action_buffer
         self.observation_buffer = observation_buffer
-        self.observation_delta = observation_delta
-        self.observation_thread = ObservationThread(self.observation_buffer, self.observation_delta)
+        self.observation_thread = ObservationThread(self.observation_buffer, observation_delta)
         self.action_thread = ActionThread(self.action_buffer)
 
     def stream_observations(self):
