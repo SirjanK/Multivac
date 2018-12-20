@@ -1,4 +1,4 @@
-from threads.base_thread import BaseThread
+from device.threads.base_thread import BaseThread
 from buffers.buffer import Buffer
 
 

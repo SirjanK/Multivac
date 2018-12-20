@@ -1,6 +1,6 @@
 from buffers.buffer import Buffer
-from threads.observation_thread import ObservationThread
-from threads.action_thread import ActionThread
+from device.threads.observation_thread import ObservationThread
+from device.threads.action_thread import ActionThread
 
 
 class ConnectionClient:

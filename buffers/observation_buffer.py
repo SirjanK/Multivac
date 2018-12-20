@@ -1,5 +1,5 @@
 from buffers.buffer import Buffer
-from session.time_manager import TimeManager
+from device.time_manager import TimeManager
 from eventobjects.observation import Observation
 
 
