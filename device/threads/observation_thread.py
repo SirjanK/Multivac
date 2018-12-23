@@ -8,13 +8,14 @@ class ObservationThread(BaseThread):
     The ObservationThread manages streaming observations from the device into the observation buffer.
     """
 
-    def __init__(self, device, observation_delta):
+    def __init__(self, redis_connection, device, observation_delta):
         """
         Initialize the ObservationThread.
+        :param redis_connection: Active connection to the redis DB
         :param device: MonkeyDevice object of the connected device.
         :param observation_delta: time interval to poll the device for observations. (milliseconds)
         """
-        super(ObservationThread, self).__init__(device)
+        super(ObservationThread, self).__init__(redis_connection, device)
         assert(type(observation_delta) == float, "Invalid type for the observation_delta.")
         self.observation_delta = observation_delta
 
