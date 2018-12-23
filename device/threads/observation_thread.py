@@ -1,5 +1,7 @@
 from device.threads.base_thread import BaseThread
 from device.time_manager import TimeManager
+from device.connection_client import OBSERVATION_BUFFER
+from eventobjects.observation import Observation
 import time
 
 
@@ -39,6 +41,8 @@ class ObservationThread(BaseThread):
             log_str = "Observation event: Image " + str(image_no) + " at timestamp " \
                       + str(TimeManager.get_default_instance().timeit())
             print(log_str)
+            observation = Observation(device_image.convertToBytes("png"), TimeManager.get_default_instance().timeit())
+            self.device.lpush(OBSERVATION_BUFFER, observation)
 
             time.sleep(self.observation_delta / 1000.0)
             image_no += 1

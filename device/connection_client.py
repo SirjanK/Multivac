@@ -5,6 +5,9 @@ import time
 import redis
 from com.android.monkeyrunner import MonkeyRunner
 
+ACTION_BUFFER = "action_buffer"
+OBSERVATION_BUFFER = "observation_buffer"
+
 
 class ConnectionClient:
     """

@@ -1,8 +1,5 @@
 from device.threads.base_thread import BaseThread
-from eventobjects.action import Action
-from random import randint
-from device.time_manager import TimeManager
-import time
+from device.connection_client import ACTION_BUFFER
 from com.android.monkeyrunner import MonkeyDevice
 
 
@@ -19,11 +16,10 @@ class ActionThread(BaseThread):
         Reads action from the action_buffer and applies it to the device.
         """
         while self.is_running:
-            # TODO Implement blocking read from action_buffer.
-            random_coordinates = (randint(0, 200), randint(0, 200))
-            action = Action(random_coordinates, TimeManager.get_default_instance().timeit())
+            # random_coordinates = (randint(0, 200), randint(0, 200))
+            # action = Action(random_coordinates, TimeManager.get_default_instance().timeit())
+            action = self.redis_connection.blpop(ACTION_BUFFER)
             self.take_action(action)
-            time.sleep(2)
 
     def take_action(self, action):
         """
