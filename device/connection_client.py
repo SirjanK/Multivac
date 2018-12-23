@@ -1,6 +1,8 @@
-from buffers.buffer import Buffer
 from device.threads.observation_thread import ObservationThread
 from device.threads.action_thread import ActionThread
+from device.time_manager import TimeManager
+import time
+from com.android.monkeyrunner import MonkeyRunner
 
 
 class ConnectionClient:
@@ -9,21 +11,21 @@ class ConnectionClient:
     It maintains a two way interface between an ActionBuffer, ObservationBuffer pair and the device.
     """
 
-    def __init__(self, action_buffer, observation_buffer, observation_delta):
+    def __init__(self, observation_delta):
         """
         Initialize the client. Verify connection with the device and setup the two buffers.
-        :param action_buffer: action buffer the client uses.
-        :param observation_buffer: observation buffer the client uses.
         :param observation_delta: float time interval in seconds that the client should poll for an
         image from the device.
         """
-        assert(isinstance(action_buffer, Buffer), "Invalid type for the action_buffer.")
-        assert(isinstance(observation_buffer, Buffer), "Invalid type for the observation_buffer.")
         assert(type(observation_delta) == float, "Invalid type for the observation_delta.")
-        self.action_buffer = action_buffer
-        self.observation_buffer = observation_buffer
-        self.observation_thread = ObservationThread(self.observation_buffer, observation_delta)
-        self.action_thread = ActionThread(self.action_buffer)
+
+        connected_device = MonkeyRunner.waitForConnection()
+        print("Device found!")
+
+        TimeManager.get_default_instance().start()
+
+        self.observation_thread = ObservationThread(connected_device, observation_delta)
+        self.action_thread = ActionThread(connected_device)
 
     def stream_observations(self):
         """
@@ -36,6 +38,14 @@ class ConnectionClient:
         Start a new thread to listen to actions in the action buffer, and take action once an element is found.
         """
         self.action_thread.start()
+
+    def wait(self, timeout):
+        """
+        Wait for the action and observation threads to terminate or until the timeout expiry is reached.
+        :param timeout: time in seconds to wait.
+        """
+        time.sleep(timeout)
+        self.shutdown()
 
     def shutdown(self):
         """

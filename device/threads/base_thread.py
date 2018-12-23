@@ -1,15 +1,22 @@
-import threading
-import sys
+from threading import Thread
 
 
-class BaseThread(threading.Thread):
+class BaseThread(Thread):
     """
     Basic Thread object that is built on top of the default threading.Thread class. It provides a shutdown hook.
     """
 
-    @classmethod
-    def shutdown(cls):
+    def __init__(self, device):
         """
-        Shutdown the thread.
+        Initializes the thread with the given device.
+        :param device: MonkeyDevice object of the connected device.
         """
-        sys.exit()
+        super(BaseThread, self).__init__()
+        self.device = device
+        self.is_running = True
+
+    def shutdown(self):
+        """
+        Mark the thread to be shutdown.
+        """
+        self.is_running = False
