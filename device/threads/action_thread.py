@@ -1,5 +1,5 @@
 from device.threads.base_thread import BaseThread
-from device.connection_client import ACTION_BUFFER
+from buffers.action_buffer import ActionBuffer
 from com.android.monkeyrunner import MonkeyDevice
 
 
@@ -8,6 +8,16 @@ class ActionThread(BaseThread):
     The ActionThread manages listening for updates to the action_buffer and taking action once
     an element arrives. It blocks otherwise.
     """
+
+    def __init__(self, redis_client, device):
+        """
+        Initializes the ActionThread.
+
+        :param redis_client: Active connection to the redis DB
+        :param device: MonkeyDevice object of the connected device.
+        """
+        super(ActionThread, self).__init__(redis_client, device)
+        self.action_buffer = ActionBuffer(redis_client)
 
     def run(self):
         """
@@ -18,7 +28,7 @@ class ActionThread(BaseThread):
         while self.is_running:
             # random_coordinates = (randint(0, 200), randint(0, 200))
             # action = Action(random_coordinates, TimeManager.get_default_instance().timeit())
-            action = self.redis_connection.blpop(ACTION_BUFFER)
+            action = self.action_buffer.blocking_read_elem()
             self.take_action(action)
 
     def take_action(self, action):

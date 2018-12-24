@@ -1,4 +1,5 @@
 import os
+from device.time_manager import TimeManager
 
 
 def parse_args(args):
@@ -19,6 +20,8 @@ def start_ultima():
 
 if __name__ == '__main__':
     print("Starting session.")
+
+    TimeManager.get_default_instance().start()
 
     # Run the connection_client.
     # TODO: Parameter parsing to get monkerunner path

@@ -1,7 +1,7 @@
 from device.threads.base_thread import BaseThread
 from device.time_manager import TimeManager
-from device.connection_client import OBSERVATION_BUFFER
 from eventobjects.observation import Observation
+from buffers.observation_buffer import ObservationBuffer
 import time
 
 
@@ -10,16 +10,16 @@ class ObservationThread(BaseThread):
     The ObservationThread manages streaming observations from the device into the observation buffer.
     """
 
-    def __init__(self, redis_connection, device, observation_delta):
+    def __init__(self, redis_client, device, observation_delta):
         """
         Initialize the ObservationThread.
-        :param redis_connection: Active connection to the redis DB
+        :param redis_client: Active connection to the redis DB
         :param device: MonkeyDevice object of the connected device.
         :param observation_delta: time interval to poll the device for observations. (milliseconds)
         """
-        super(ObservationThread, self).__init__(redis_connection, device)
-        assert(type(observation_delta) == float, "Invalid type for the observation_delta.")
+        super(ObservationThread, self).__init__(redis_client, device)
         self.observation_delta = observation_delta
+        self.observation_buffer = ObservationBuffer(redis_client)
 
     def run(self):
         """
@@ -42,7 +42,7 @@ class ObservationThread(BaseThread):
                       + str(TimeManager.get_default_instance().timeit())
             print(log_str)
             observation = Observation(device_image.convertToBytes("png"), TimeManager.get_default_instance().timeit())
-            self.device.lpush(OBSERVATION_BUFFER, observation)
+            self.observation_buffer.put_elem(observation)
 
             time.sleep(self.observation_delta / 1000.0)
             image_no += 1

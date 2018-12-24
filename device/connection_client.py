@@ -1,12 +1,8 @@
 from device.threads.observation_thread import ObservationThread
 from device.threads.action_thread import ActionThread
-from device.time_manager import TimeManager
 import time
 import redis
 from com.android.monkeyrunner import MonkeyRunner
-
-ACTION_BUFFER = "action_buffer"
-OBSERVATION_BUFFER = "observation_buffer"
 
 
 class ConnectionClient:
@@ -22,18 +18,14 @@ class ConnectionClient:
         :param observation_delta: float time interval in seconds that the client should poll for an
         image from the device.
         """
-        assert(type(observation_delta) == float, "Invalid type for the observation_delta.")
-
         connected_device = MonkeyRunner.waitForConnection()
         print("Device found!")
 
-        TimeManager.get_default_instance().start()
-
         # Start Redis connection on specified port.
-        redis_connection = redis.Redis(port=redis_port)
+        self.redis_connection = redis.Redis(port=redis_port)
 
-        self.observation_thread = ObservationThread(redis_connection, connected_device, observation_delta)
-        self.action_thread = ActionThread(redis_connection, connected_device)
+        self.observation_thread = ObservationThread(self.redis_connection, connected_device, observation_delta)
+        self.action_thread = ActionThread(self.redis_connection, connected_device)
 
     def stream_observations(self):
         """
@@ -59,5 +51,6 @@ class ConnectionClient:
         """
         Shutdowns the connection client.
         """
+        self.redis_connection.shutdown()
         self.observation_thread.shutdown()
         self.action_thread.shutdown()
