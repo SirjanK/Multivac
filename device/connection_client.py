@@ -1,5 +1,5 @@
-from device.threads.observation_thread import ObservationThread
 from device.threads.action_thread import ActionThread
+from device.threads.observation_thread import ObservationThread
 import time
 import redis
 from com.android.monkeyrunner import MonkeyRunner
@@ -15,7 +15,7 @@ class ConnectionClient:
         """
         Initialize the client. Verify connection with the device and setup the two buffers.
         :param redis_port: Port to either start or retrieve the redis connection.
-        :param observation_delta: float time interval in seconds that the client should poll for an
+        :param observation_delta: time interval in milliseconds that the client should poll for an
         image from the device.
         """
         connected_device = MonkeyRunner.waitForConnection()

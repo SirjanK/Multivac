@@ -19,14 +19,16 @@ def test_connection_client_simple():
     """
     print("Test ConnectionClient simple.")
 
+    # Launch a thread to place an action in the ActionBuffer every 1 second.
+    action_thread = Thread(target=place_random_actions, args=(1, 50))
+    action_thread.start()
+
     # Run the connection_client.
     # TODO: Parameter parsing to get monkerunner path
     monkeyrunner_cmd = "~/Android/Sdk/tools/bin/monkeyrunner"
     os.system(monkeyrunner_cmd + " " + "device/connection_client_starter.py")
 
-    # Launch a thread to place an action in the ActionBuffer every 1 second.
-    # action_thread = Thread(target=place_random_actions, args=(1, 50))
-    # action_thread.start()
+    action_thread.join()
 
 
 def place_random_actions(interval, num_actions):
@@ -37,6 +39,11 @@ def place_random_actions(interval, num_actions):
     """
     # TODO: Fix inconsistency between time managers.
     TimeManager.get_default_instance().start()
+
+    # Give some time for the connection client to get started
+    time.sleep(10)
+
+    print("Starting to place actions into redis.")
 
     for _ in range(num_actions):
         time.sleep(interval)

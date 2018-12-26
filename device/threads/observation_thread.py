@@ -29,6 +29,7 @@ class ObservationThread(BaseThread):
         observation buffer as well as writing the image to disk.
         """
         image_no = 0
+        sleep_time = self.observation_delta / 1000.0
 
         while self.is_running:
             device_image = self.device.takeSnapshot()
@@ -44,5 +45,5 @@ class ObservationThread(BaseThread):
             observation = Observation(device_image.convertToBytes("png"), TimeManager.get_default_instance().timeit())
             self.observation_buffer.put_elem(observation)
 
-            time.sleep(self.observation_delta / 1000.0)
+            time.sleep(sleep_time)
             image_no += 1

@@ -26,8 +26,6 @@ class ActionThread(BaseThread):
         Reads action from the action_buffer and applies it to the device.
         """
         while self.is_running:
-            # random_coordinates = (randint(0, 200), randint(0, 200))
-            # action = Action(random_coordinates, TimeManager.get_default_instance().timeit())
             action = self.action_buffer.blocking_read_elem()
             self.take_action(action)
 
