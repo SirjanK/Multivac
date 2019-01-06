@@ -1,25 +1,24 @@
 from buffers.buffer import Buffer
-from session.time_manager import TimeManager
 from eventobjects.action import Action
+
+ACTION_BUFFER_NAME = "action_buffer"
 
 
 class ActionBuffer(Buffer):
     """
-    The ActionBuffer object maintains a queue of actions that will be taken on a device.
+    The ActionBuffer class abstracts away the underlying redis list containing actions that should
+    be taken on the device.
     """
 
-    def __init__(self):
+    def __init__(self, redis_client):
         """
-        Initializes the ActionBuffer object.
+        Initialize the ObservationBuffer.
+        :param redis_client: Redis client for an active connection.
         """
-        super(ActionBuffer, self).__init__()
-        self.time_manager = TimeManager.get_default_instance()
+        super(ActionBuffer, self).__init__(ACTION_BUFFER_NAME, redis_client)
 
-    def enrich_element_from_queue(self, queue_elem):
-        """
-        Enrich an element to return to a client. Wrap into an Action object.
-        :param queue_elem: element from the internal queue. Tuple of (x, y) coordinate.
-        :return: enriched Action element.
-        """
-        timestamp = self.time_manager.timeit()
-        return Action(queue_elem, timestamp)
+    def serialize_elem(self, elem):
+        return elem.serialize()
+
+    def deserialize_elem(self, elem_str):
+        return Action.deserialize(elem_str)

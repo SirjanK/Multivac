@@ -1,30 +1,24 @@
 from buffers.buffer import Buffer
-from session.time_manager import TimeManager
 from eventobjects.observation import Observation
+
+OBSERVATION_BUFFER_NAME = "observation_buffer"
 
 
 class ObservationBuffer(Buffer):
     """
-    The ObservationBuffer object maintains a queue of observations from a device.
+    The ObservationBuffer class abstracts away the underlying redis list containing observations that should
+    be taken on the device.
     """
-    IMAGE_TYPE = "jpg"
 
-    def __init__(self):
+    def __init__(self, redis_client):
         """
-        Initializes the ObservationBuffer object.
+        Initialize the ObservationBuffer.
+        :param redis_client: Redis client for an active connection.
         """
-        super(ObservationBuffer, self).__init__()
-        self.time_manager = TimeManager.get_default_instance()
+        super(ObservationBuffer, self).__init__(OBSERVATION_BUFFER_NAME, redis_client)
 
-    def enrich_element_to_queue(self, written_elem):
-        """
-        Enrich an element to add to the queue. Wrap into an Observation object.
-        :param written_elem: element from the internal queue. MonkeyImage instance.
-        :return: enriched Observation element.
-        """
-        timestamp = self.time_manager.timeit()
+    def serialize_elem(self, elem):
+        return elem.serialize()
 
-        # Convert MonkeyImage to string bytes. Format specified by IMAGE_TYPE.
-        image_bytes = written_elem.convertToBytes(self.IMAGE_TYPE)
-
-        return Observation(image_bytes, timestamp)
+    def deserialize_elem(self, elem_str):
+        return Observation.deserialize(elem_str)
