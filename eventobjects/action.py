@@ -3,17 +3,17 @@ import pickle
 
 class Action(object):
     """
-    Action object that designates a click on the mobile screen at a certain time.
+    Action object that designates a click on the mobile screen.
     """
 
-    def __init__(self, click_coordinate, timestamp):
+    def __init__(self, click_coordinate, is_reset_action=False):
         """
         Initializes the Action object.
         :param click_coordinate: tuple of (x, y) coordinates on the screen.
-        :param timestamp: float elapsed time in milliseconds from session start.
+        :param is_reset_session: flag to indicate whether this action is a 'reset' action (return device to initial state)
         """
         self.click_coordinate = click_coordinate
-        self.timestamp = timestamp
+        self.is_reset_action = is_reset_action
 
     def serialize(self):
         """
@@ -30,3 +30,7 @@ class Action(object):
         :return: Action object.
         """
         return pickle.loads(str_repr)
+
+
+# Singleton instance of the Action object denoting a 'reset' action.
+RESET_ACTION = Action(None, is_reset_action=True)

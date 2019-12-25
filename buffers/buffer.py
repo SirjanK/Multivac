@@ -36,6 +36,12 @@ class Buffer(object):
         serialized_elem = self.serialize_elem(elem)
         self.redis_client.lpush(self.buffer_name, serialized_elem)
 
+    def clearall(self):
+        """
+        Clears the buffer.
+        """
+        self.redis_client.delete(self.buffer_name)
+
     def serialize_elem(self, elem):
         """
         Serialize the buffer elem to a string.

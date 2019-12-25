@@ -1,13 +1,11 @@
 from device.threads.base_thread import BaseThread
-from device.time_manager import TimeManager
 from eventobjects.observation import Observation
 from buffers.observation_buffer import ObservationBuffer
-import time
 
 
 class ObservationThread(BaseThread):
     """
-    The ObservationThread manages streaming observations from the device into the observation buffer.
+    The ObservationThread manages placing observations from the device into the observation buffer once
     """
 
     def __init__(self, redis_client, device, observation_delta):
@@ -38,11 +36,7 @@ class ObservationThread(BaseThread):
             # TODO implement write to disk without blocking thread.
             device_image.writeToFile("./out/" + str(image_no) + ".png", "png")
 
-            # TODO implement write to observation buffer.
-            log_str = "Observation event: Image " + str(image_no) + " at timestamp " \
-                      + str(TimeManager.get_default_instance().timeit())
-            print(log_str)
-            observation = Observation(device_image.convertToBytes("png"), TimeManager.get_default_instance().timeit())
+            observation = Observation(device_image.convertToBytes("png"))
             self.observation_buffer.put_elem(observation)
 
             time.sleep(sleep_time)

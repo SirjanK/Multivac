@@ -3,17 +3,15 @@ import pickle
 
 class Observation(object):
     """
-    Observation object that designates a response image of the mobile screen at a certain time.
+    Observation object that designates a response image of the mobile screen.
     """
 
-    def __init__(self, image_bytes, timestamp):
+    def __init__(self, image_bytes):
         """
         Initializes the Observation object.
         :param image_bytes: string of jpg encoded image.
-        :param timestamp: float elapsed time in milliseconds from session start.
         """
         self.image_bytes = image_bytes
-        self.timestamp = timestamp
 
     def serialize(self):
         """
