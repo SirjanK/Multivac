@@ -33,14 +33,6 @@ class ConnectionClient:
         """
         self.device_thread.start()
 
-    def wait(self, timeout):
-        """
-        Wait for the until the timeout expiry is reached and then shutdown.
-        :param timeout: time in seconds to wait.
-        """
-        time.sleep(timeout)
-        self.shutdown()
-
     def shutdown(self):
         """
         Shutdowns the connection client.

@@ -107,7 +107,7 @@ class AndroidDeviceEnv(gym.Env):
         observation = self.observation_buffer.blocking_read_elem()
 
         # Decode image bytes into a numpy array.
-        pil_image = Image.open(StringIO.StringIO(observation.image_bytes))
+        pil_image = Image.open(StringIO(observation.image_bytes))
 
         return np.array(pil_image)
 
