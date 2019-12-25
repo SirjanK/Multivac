@@ -9,7 +9,7 @@ class Observation(object):
     def __init__(self, image_bytes):
         """
         Initializes the Observation object.
-        :param image_bytes: string of jpg encoded image.
+        :param image_bytes: string of png encoded image.
         """
         self.image_bytes = image_bytes
 

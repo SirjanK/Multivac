@@ -1,6 +1,9 @@
 import gym
 import numpy as np
 
+from io import StringIO
+from PIL import Image
+
 from eventobjects import action
 
 
@@ -48,8 +51,8 @@ class AndroidDeviceEnv(gym.Env):
         # Add the action into the action buffer
         self.action_buffer.put_elem(action_buffer_elem)
 
-        # Carry out a blocking read from the observation buffer. This observation corresponds to the image once the action has been taken.
-        new_observation = self.observation_buffer.blocking_read_elem()
+        # Get new observation once action has been taken. This observation corresponds to the image once the action has been taken.
+        new_observation = self.get_new_observation()
 
         # Increment the num_steps counter
         self.num_steps += 1
@@ -77,7 +80,7 @@ class AndroidDeviceEnv(gym.Env):
         self.action_buffer.put_elem(action.RESET_ACTION)
 
         # Read initial response
-        self.most_recent_observation = self.observation_buffer.blocking_read_elem()
+        self.most_recent_observation = self.get_new_observation()
 
         return self.most_recent_observation
 
@@ -88,6 +91,19 @@ class AndroidDeviceEnv(gym.Env):
             return self.most_recent_observation
         else:
             super(AndroidDeviceEnv, self).render(mode=mode)  # just raise an exception for invalid mode
+
+    def get_new_observation():
+        """
+        Gather the observation object from the observation buffer and decode the image into a numpy array that aligns with the observation space.
+        """
+        # Blocking read from the observation buffer.
+        observation = self.observation_buffer.blocking_read_elem()
+
+        # Decode image bytes into a numpy array.
+        pil_image = Image.open(StringIO.StringIO(observation.image_bytes))
+
+        return np.array(pil_image)
+
 
     def compute_reward(new_observation):
         """
