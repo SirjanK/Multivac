@@ -9,6 +9,9 @@ For list of parameters required, run `python -h session_starter.py`.
 import argparse
 import subprocess
 
+from agents.agent_registry import AGENTS
+from environment.environment_registry import ENVIRONMENTS
+
 # Input parameter keys.
 MONKEYRUNNER_PATH = "monkeyrunner-path"
 REDISPY_PATH = "redispy-path"
@@ -76,9 +79,10 @@ def parse_args():
     parser.add_argument('--' + MONKEYRUNNER_PATH, type=str, required=True,
                         help="Local filepath to installed monkeyrunner cmd")
     parser.add_argument('--' + REDISPY_PATH, type=str, required=True, help="Local filepath to installed redispy source")
-    parser.add_argument('--' + ENVIRONMENT_NAME, type=str, required=True, choices=['a'],
+    parser.add_argument('--' + ENVIRONMENT_NAME, type=str, required=True, choices=ENVIRONMENTS.keys(),
                         help="Name of the environment to start")
-    parser.add_argument('--' + AGENT_NAME, type=str, required=True, choices=['b'], help="Name of the agent to use")
+    parser.add_argument('--' + AGENT_NAME, type=str, required=True, choices=AGENTS.keys(),
+                        help="Name of the agent to use")
     parser.add_argument('--' + NUM_STEPS, type=int, required=True,
                         help="Number of steps to take on the environment before terminating.")
     parser.add_argument('--' + OBSERVATION_DELTA, type=int, required=False, default=1000,
