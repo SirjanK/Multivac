@@ -104,7 +104,6 @@ class AndroidDeviceEnv(gym.Env):
 
         return np.array(pil_image)
 
-
     def compute_reward(new_observation):
         """
         TODO: provide clean way of providing new reward functions in order to experiment. Current design only supports one at a time. One way is passing a function into the constructor.
