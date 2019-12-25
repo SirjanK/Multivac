@@ -1,13 +1,14 @@
 import gym
 import numpy as np
 
+from abc import ABC
 from io import StringIO
 from PIL import Image
 
 from eventobjects.action import Action, RESET_ACTION
 
 
-class AndroidDeviceEnv(gym.Env):
+class AndroidDeviceEnv(gym.Env, ABC):
     """
     The AndroidDeviceEnv implements the gym Env interface in order to interface
     with an Android device through the abstraction layers of the Action and Observation buffers.
@@ -113,16 +114,13 @@ class AndroidDeviceEnv(gym.Env):
 
     def compute_reward(self, new_observation):
         """
-        TODO: provide clean way of providing new reward functions in order to experiment. Current design only supports one at a time. One way is passing a function into the constructor.
-
         Compute reward value based on the new observation image. It utilizes current state information like
         current observation, number of steps so far, and this new observation to compute the reward.
+
+        Can be overridden to include more information from other state variables if necessary.
+
+        :param new_observation: numpy array containing the new screen image (H x W x C) where C is the number of
+        channels (C = 3 for RGB).
+        :return: float reward value.
         """
-        # TODO more sophisticated reward fn.
-
-        # Current reward fn computes the average pixel difference between the current and new observations.
-        # Agent learns to click on buttons on screen that change what is going on.
-        image_diff = np.absolute(new_observation - self.most_recent_observation)
-
-        return np.mean(image_diff)
-
+        raise NotImplementedError
