@@ -1,8 +1,8 @@
 import time
 
+from com.android.monkeyrunner import MonkeyDevice
 from threading import Thread
 
-from eventobjects.action import Action
 from eventobjects.observation import Observation
 
 from buffers.action_buffer import ActionBuffer
@@ -26,7 +26,7 @@ class DeviceThread(Thread):
         :param device: MonkeyDevice object of the connected device.
         :param observation_delta: Time in milliseconds to wait after taking the action to screenshot an observation.
         """
-        super(BaseThread, self).__init__()
+        super(DeviceThread, self).__init__()
 
         # Initialize buffers.
         self.action_buffer = ActionBuffer(redis_client)
@@ -66,13 +66,13 @@ class DeviceThread(Thread):
             print("Action taken! This is a reset action causing device reboot")
 
             # Custom sleep for a longer period of time since reboot may take a while
-            time.sleep(REBOOT_TIME)
+            time.sleep(self.REBOOT_TIME)
         else:
             x, y = action.click_coordinate
             self.device.touch(x, y, MonkeyDevice.DOWN_AND_UP)
             print("Action taken! Coordinates (" + str(x) + "," + str(y) + ")")
 
-    def gather_observation(self, observation):
+    def gather_observation(self):
         """
         Take a screenshot of the device and add the image bytes (png format) into the observation buffer.
         """

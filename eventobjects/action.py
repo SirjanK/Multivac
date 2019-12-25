@@ -10,7 +10,7 @@ class Action(object):
         """
         Initializes the Action object.
         :param click_coordinate: tuple of (x, y) coordinates on the screen.
-        :param is_reset_session: flag to indicate whether this action is a 'reset' action (return device to initial state)
+        :param is_reset_action: flag to indicate whether this action is a 'reset' action (return device to initial state)
         """
         self.click_coordinate = click_coordinate
         self.is_reset_action = is_reset_action

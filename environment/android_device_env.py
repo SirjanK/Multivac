@@ -4,7 +4,7 @@ import numpy as np
 from io import StringIO
 from PIL import Image
 
-from eventobjects import action
+from eventobjects.action import Action, RESET_ACTION
 
 
 class AndroidDeviceEnv(gym.Env):
@@ -42,7 +42,12 @@ class AndroidDeviceEnv(gym.Env):
         self.action_space = gym.spaces.Box(low=[0.0, 0.0], high=[image_height, image_width], dtype=np.float32)
 
         # H x W x C where C is number of channels.
-        self.observation_space = gym.spaces.Box(low=0, high=255, shape=[image_height, image_width, self.NUM_CHANNELS], dtype=np.uint8)
+        self.observation_space = gym.spaces.Box(
+            low=0,
+            high=255,
+            shape=[image_height, image_width, self.NUM_CHANNELS],
+            dtype=np.uint8
+        )
 
     def step(self, action):
         # Wrap the action from the action space into an Action object
@@ -51,7 +56,8 @@ class AndroidDeviceEnv(gym.Env):
         # Add the action into the action buffer
         self.action_buffer.put_elem(action_buffer_elem)
 
-        # Get new observation once action has been taken. This observation corresponds to the image once the action has been taken.
+        # Get new observation once action has been taken.
+        # This observation corresponds to the image once the action has been taken.
         new_observation = self.get_new_observation()
 
         # Increment the num_steps counter
@@ -77,22 +83,23 @@ class AndroidDeviceEnv(gym.Env):
         self.observation_buffer.clearall()
 
         # Send a 'reset' action to the ActionBuffer so that the initial observation can be sent.
-        self.action_buffer.put_elem(action.RESET_ACTION)
+        self.action_buffer.put_elem(RESET_ACTION)
 
         # Read initial response
         self.most_recent_observation = self.get_new_observation()
 
         return self.most_recent_observation
 
-    def render(self, mode):
+    def render(self, mode='human'):
         if not self.most_recent_observation:
-            raise Exception("most_recent_observation has not been set to a valid image. Most likely cause is neither step() nor reset() has been called in advance.")
+            raise Exception("most_recent_observation has not been set to a valid image. " +
+                            "Most likely cause is neither step() nor reset() has been called in advance.")
         if mode == 'rgb_array':
             return self.most_recent_observation
         else:
             super(AndroidDeviceEnv, self).render(mode=mode)  # just raise an exception for invalid mode
 
-    def get_new_observation():
+    def get_new_observation(self):
         """
         Gather the observation object from the observation buffer and decode the image into a numpy array that aligns with the observation space.
         """
@@ -104,7 +111,7 @@ class AndroidDeviceEnv(gym.Env):
 
         return np.array(pil_image)
 
-    def compute_reward(new_observation):
+    def compute_reward(self, new_observation):
         """
         TODO: provide clean way of providing new reward functions in order to experiment. Current design only supports one at a time. One way is passing a function into the constructor.
 
@@ -113,8 +120,9 @@ class AndroidDeviceEnv(gym.Env):
         """
         # TODO more sophisticated reward fn.
 
-        # Current reward fn computes the average pixel difference between the current and new observations (agent learns to click on buttons on screen that change what is going on).
-        image_diff = np.absolute(new_observation - self.current_observation)
+        # Current reward fn computes the average pixel difference between the current and new observations.
+        # Agent learns to click on buttons on screen that change what is going on.
+        image_diff = np.absolute(new_observation - self.most_recent_observation)
 
         return np.mean(image_diff)
 
