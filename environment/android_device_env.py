@@ -114,7 +114,11 @@ class AndroidDeviceEnv(gym.Env, ABC):
         # Decode image bytes into a numpy array.
         pil_image = Image.open(StringIO(observation.image_bytes))
 
-        return np.array(pil_image)
+        image_arr = np.array(pil_image)
+
+        print("IMAGE SHAPE: {}".format(image_arr.shape))
+
+        return image_arr
 
     def compute_reward(self, new_observation):
         """

@@ -11,12 +11,14 @@ import subprocess
 
 from agents.agent_registry import AGENTS
 from environment.environment_registry import ENVIRONMENTS
+from session.multivac import Multivac
 
 # Input parameter keys.
 MONKEYRUNNER_PATH = "monkeyrunner-path"
 REDISPY_PATH = "redispy-path"
 MULTIVAC_VERSION = "multivac-version"
-NUM_STEPS = "num-steps"
+NUM_TRAIN_STEPS = "num-train-steps"
+NUM_INFERENCE_STEPS = "num-inference-steps"
 OBSERVATION_DELTA = "observation-delta"
 ENVIRONMENT_NAME = "environment-name"
 AGENT_NAME = "agent-name"
@@ -53,20 +55,11 @@ def start_connection_client(monkeyrunner_path, redispy_path, redis_port, observa
     :return Popen object corresponding to the process running the connection client.
     """
     connection_client_process = subprocess.Popen(
-        [monkeyrunner_path, CONNECTION_CLIENT_STARTER_SCRIPT_PATH, redispy_path, redis_port, observation_delta]
+        [monkeyrunner_path, CONNECTION_CLIENT_STARTER_SCRIPT_PATH, redispy_path, str(redis_port),
+         str(observation_delta)]
     )
 
     return connection_client_process
-
-
-def run_multivac(version, session_time):
-    """
-    Starts the Multivac with specific version which determines the algorithm used.
-    :param version: Integer >= 0 representing the Multivac version.
-    :param session_time: Time to run the session.
-    """
-    # TODO implement
-    pass
 
 
 def parse_args():
@@ -83,7 +76,9 @@ def parse_args():
                         help="Name of the environment to start")
     parser.add_argument('--' + AGENT_NAME, type=str, required=True, choices=AGENTS.keys(),
                         help="Name of the agent to use")
-    parser.add_argument('--' + NUM_STEPS, type=int, required=True,
+    parser.add_argument('--' + NUM_TRAIN_STEPS, type=int, required=True,
+                        help="Number of steps to take on the environment during training.")
+    parser.add_argument('--' + NUM_INFERENCE_STEPS, type=int, required=True,
                         help="Number of steps to take on the environment before terminating.")
     parser.add_argument('--' + OBSERVATION_DELTA, type=int, required=False, default=1000,
                         help="Time to wait in milliseconds after taking an action in order to take a screenshot")
@@ -102,14 +97,22 @@ if __name__ == '__main__':
 
     # Start connection client
     device_process = start_connection_client(
-        monkeyrunner_path=params[MONKEYRUNNER_PATH],
-        redispy_path=[REDISPY_PATH],
+        monkeyrunner_path=params.monkeyrunner_path,
+        redispy_path=params.redispy_path,
         redis_port=DEFAULT_REDIS_PORT,
-        observation_delta=params[OBSERVATION_DELTA]
+        observation_delta=params.observation_delta
     )
 
     # Run the Multivac
-    # run_multivac(params[MULTIVAC_VERSION], params[SESSION_TIME])
+    multivac = Multivac(
+        params.environment_name,
+        params.agent_name,
+        params.num_train_steps,
+        params.num_inference_steps,
+        DEFAULT_REDIS_PORT
+    )
+
+    multivac.launch()
 
     # Terminate connection client once finished.
     device_process.terminate()

@@ -1,5 +1,7 @@
 import redis
 
+import matplotlib.pyplot as plt
+
 from agents.agent_registry import AGENTS
 from buffers.action_buffer import ActionBuffer
 from buffers.observation_buffer import ObservationBuffer
@@ -50,10 +52,18 @@ class Multivac:
         curr_obs = self.environment.reset()
 
         print("Starting to carry out inference for the agent.")
+
+        total_reward = 0.0
         for step in range(self.num_inference_steps):
             action = self.agent.predict(curr_obs)
             curr_obs, reward, info = self.environment.step(action)
-            self.environment.render()
+            rendered_img = self.environment.render()
+            total_reward += reward
+
+            plt.imshow(rendered_img)
 
         print("Done, now shutting down.")
         self.redis_client.shutdown()
+
+        print("FINAL TOTAL REWARD: {}".format(total_reward))
+        print("FINAL AVERAGE REWARD: {}".format(total_reward / self.num_inference_steps))

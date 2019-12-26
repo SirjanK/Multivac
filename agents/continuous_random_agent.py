@@ -9,7 +9,7 @@ class ContinuousRandomAgent(BaseAndroidAgent):
     """
 
     def __init__(self, env):
-        super(BaseAndroidAgent, self).__init__(env)
+        super(ContinuousRandomAgent, self).__init__(env)
 
         low, high = env.action_space.low, env.action_space.high
 

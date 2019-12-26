@@ -14,10 +14,8 @@ class BaseAndroidAgent(ABC):
         Initialize the agent.
         :param env: AndroidDeviceEnv instance this agent will act on.
         """
-        assert(
-            isinstance(env, AndroidDeviceEnv),
+        assert isinstance(env, AndroidDeviceEnv), \
             'Agent must be initialized with an environment that is an instance of AndroidDeviceEnv.'
-        )
 
         self.env = env
 
