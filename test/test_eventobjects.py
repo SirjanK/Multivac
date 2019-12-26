@@ -30,9 +30,9 @@ def test_observation():
     """
     Simple tests for Observation serialization and deserialization.
     """
-    test_observation_with_ground_truth(b'adfasfasfasfasf')
-    test_observation_with_ground_truth(b'')
-    test_observation_with_ground_truth(b'34324324324121jkjlkf23k4h24hlkl2k3h4lkh324lh24lkj2')
+    test_observation_with_ground_truth(b"adfasfasfasfasf")
+    test_observation_with_ground_truth(b"")
+    test_observation_with_ground_truth(b"34324324324121jkjlkf23k4h24hlkl2k3h4lkh324lh24lkj2")
 
 
 def test_observation_with_ground_truth(image_bytes):
