@@ -40,7 +40,11 @@ class AndroidDeviceEnv(gym.Env, ABC):
         self.most_recent_observation = None
 
         # 2D continuous grid
-        self.action_space = gym.spaces.Box(low=[0.0, 0.0], high=[image_height, image_width], dtype=np.float32)
+        self.action_space = gym.spaces.Box(
+            low=np.array([0.0, 0.0]),
+            high=np.array([image_height, image_width]),
+            dtype=np.float32
+        )
 
         # H x W x C where C is number of channels.
         self.observation_space = gym.spaces.Box(
