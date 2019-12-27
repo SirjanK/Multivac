@@ -116,7 +116,7 @@ class AndroidDeviceEnv(gym.Env, ABC):
 
         image_arr = np.array(pil_image)
 
-        print("IMAGE SHAPE: {}".format(image_arr.shape))
+        print("IMAGE SHAPE: {}".format(image_arr.shape))  # TODO: remove
 
         return image_arr
 

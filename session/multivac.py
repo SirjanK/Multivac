@@ -1,6 +1,5 @@
-import redis
-
 import matplotlib.pyplot as plt
+import redis
 
 from agents.agent_registry import AGENTS
 from buffers.action_buffer import ActionBuffer

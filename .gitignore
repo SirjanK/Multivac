@@ -4,3 +4,4 @@ venv/
 *.class
 __pycache__
 out/
+*.rdb

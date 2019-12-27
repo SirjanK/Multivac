@@ -7,6 +7,7 @@ For list of parameters required, run `python -h session_starter.py`.
 
 
 import argparse
+import atexit
 import subprocess
 
 from agents.agent_registry import AGENTS
@@ -95,6 +96,8 @@ if __name__ == '__main__':
     # Start Redis DB
     redis_process = start_redis_db()
 
+    atexit.register(lambda: redis_process.terminate())
+
     # Start connection client
     device_process = start_connection_client(
         monkeyrunner_path=params.monkeyrunner_path,
@@ -102,6 +105,8 @@ if __name__ == '__main__':
         redis_port=DEFAULT_REDIS_PORT,
         observation_delta=params.observation_delta
     )
+
+    atexit.register(lambda: device_process.terminate())
 
     # Run the Multivac
     multivac = Multivac(
