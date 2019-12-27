@@ -50,12 +50,7 @@ class ConnectionClient:
         and takes a screenshot of the device.
         """
         while True:
-            print("GETS HERE")
-            for elem in self.action_buffer.redis_client.scan_iter():
-                print("KEY: " + str(elem))
-            print("GETS HERE?")
             action = self.action_buffer.blocking_read_elem()
-            print("GETS HERE 2")
             self.take_action(action)
 
             time.sleep(self.observation_delta)
@@ -75,6 +70,9 @@ class ConnectionClient:
 
             # Custom sleep for a longer period of time since reboot may take a while
             time.sleep(self.REBOOT_TIME)
+
+            # Reconnect device
+            self.connected_device = MonkeyRunner.waitForConnection()
         else:
             x, y = action.click_coordinate
             self.connected_device.touch(x, y, MonkeyDevice.DOWN_AND_UP)
