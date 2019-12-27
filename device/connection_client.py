@@ -1,56 +1,102 @@
-from device.threads.action_thread import ActionThread
-from device.threads.observation_thread import ObservationThread
-import time
 import redis
-from com.android.monkeyrunner import MonkeyRunner
+import time
+
+from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
+
+from buffers.action_buffer import ActionBuffer
+from buffers.observation_buffer import ObservationBuffer
+from eventobjects.observation import Observation
 
 
 class ConnectionClient:
     """
     The ConnectionClient object manages I/O with a connected device via the monkeyrunner API.
     It maintains a two way interface between an ActionBuffer, ObservationBuffer pair and the device.
+
+    Specifically, the client manages listening for updates to the action buffer and taking action once
+    an element arrives. It blocks otherwise. When the action is taken, it waits for a predefined amount of time
+    before taking a screenshot of the device. This is then placed into the observation buffer.
     """
 
-    def __init__(self, redis_port, observation_delta):
+    # Time in seconds to wait to screenshot if a reset action is taken.
+    REBOOT_TIME = 10
+
+    def __init__(self, redis_port, observation_delta=1000):
         """
         Initialize the client. Verify connection with the device and setup the two buffers.
-        :param redis_port: Port to either start or retrieve the redis connection.
-        :param observation_delta: time interval in milliseconds that the client should poll for an
+        :param redis_port: Port to start the redis connection.
+        :param observation_delta: Time interval in milliseconds that the client should poll for an
         image from the device.
         """
-        connected_device = MonkeyRunner.waitForConnection()
+
+        print("Waiting for device connection.")
+        self.connected_device = MonkeyRunner.waitForConnection()
         print("Device found!")
 
         # Start Redis connection on specified port.
-        self.redis_connection = redis.Redis(port=redis_port)
+        self.redis_client = redis.Redis(port=redis_port)
 
-        self.observation_thread = ObservationThread(self.redis_connection, connected_device, observation_delta)
-        self.action_thread = ActionThread(self.redis_connection, connected_device)
+        # Initialize buffers.
+        self.action_buffer = ActionBuffer(self.redis_client)
+        self.observation_buffer = ObservationBuffer(self.redis_client)
 
-    def stream_observations(self):
-        """
-        Start a new thread to stream observations to the observation buffer.
-        """
-        self.observation_thread.start()
+        self.observation_delta = observation_delta / 1000.0
 
-    def start_action_input(self):
+    def start(self):
         """
-        Start a new thread to listen to actions in the action buffer, and take action once an element is found.
-        """
-        self.action_thread.start()
+        Starts an infinite cycle of listening to the action buffer and populating the observation buffer.
+        Once terminated, the shutdown function will be invoked.
 
-    def wait(self, timeout):
+        Reads action from the action_buffer and applies it to the device. Then waits observation_delta milliseconds
+        and takes a screenshot of the device.
         """
-        Wait for the action and observation threads to terminate or until the timeout expiry is reached.
-        :param timeout: time in seconds to wait.
+
+        while True:
+            action = self.action_buffer.blocking_read_elem()
+            self.take_action(action)
+
+            time.sleep(self.observation_delta)
+
+            self.gather_observation()
+
+    def take_action(self, action):
         """
-        time.sleep(timeout)
-        self.shutdown()
+        Takes the given action on the device.
+        :param action: Action object.
+        """
+
+        if action.is_reset_action:
+            # Reboot device if the action specified is 'reset'
+            self.connected_device.reboot("None")
+
+            print("Action taken! This is a reset action causing device reboot")
+
+            # Custom sleep for a longer period of time since reboot may take a while
+            time.sleep(self.REBOOT_TIME)
+
+            # Reconnect device
+            self.connected_device = MonkeyRunner.waitForConnection()
+        else:
+            x, y = action.click_coordinate
+            device_x, device_y = int(x), int(y)
+            self.connected_device.touch(device_x, device_y, MonkeyDevice.DOWN_AND_UP)
+            print("Action taken! Coordinates (" + str(device_x) + "," + str(device_y) + ")")
+
+    def gather_observation(self):
+        """
+        Take a screenshot of the device and add the image bytes (png format) into the observation buffer.
+        """
+
+        device_image = self.connected_device.takeSnapshot()
+
+        img_bytes = device_image.convertToBytes().tostring()
+
+        observation = Observation(img_bytes)
+        self.observation_buffer.put_elem(observation)
 
     def shutdown(self):
         """
         Shutdowns the connection client.
         """
-        self.redis_connection.shutdown()
-        self.observation_thread.shutdown()
-        self.action_thread.shutdown()
+
+        self.redis_client.shutdown()
