@@ -13,7 +13,7 @@ class ConnectionClient:
     The ConnectionClient object manages I/O with a connected device via the monkeyrunner API.
     It maintains a two way interface between an ActionBuffer, ObservationBuffer pair and the device.
 
-    Specifically, the manages listening for updates to the action buffer and taking action once
+    Specifically, the client manages listening for updates to the action buffer and taking action once
     an element arrives. It blocks otherwise. When the action is taken, it waits for a predefined amount of time
     before taking a screenshot of the device. This is then placed into the observation buffer.
     """
@@ -24,10 +24,11 @@ class ConnectionClient:
     def __init__(self, redis_port, observation_delta=1000):
         """
         Initialize the client. Verify connection with the device and setup the two buffers.
-        :param redis_port: Port to either start or retrieve the redis connection.
-        :param observation_delta: time interval in milliseconds that the client should poll for an
+        :param redis_port: Port to start the redis connection.
+        :param observation_delta: Time interval in milliseconds that the client should poll for an
         image from the device.
         """
+
         print("Waiting for device connection.")
         self.connected_device = MonkeyRunner.waitForConnection()
         print("Device found!")
@@ -49,6 +50,7 @@ class ConnectionClient:
         Reads action from the action_buffer and applies it to the device. Then waits observation_delta milliseconds
         and takes a screenshot of the device.
         """
+
         while True:
             action = self.action_buffer.blocking_read_elem()
             self.take_action(action)
@@ -62,6 +64,7 @@ class ConnectionClient:
         Takes the given action on the device.
         :param action: Action object.
         """
+
         if action.is_reset_action:
             # Reboot device if the action specified is 'reset'
             self.connected_device.reboot("None")
@@ -75,13 +78,15 @@ class ConnectionClient:
             self.connected_device = MonkeyRunner.waitForConnection()
         else:
             x, y = action.click_coordinate
-            self.connected_device.touch(int(x), int(y), MonkeyDevice.DOWN_AND_UP)
-            print("Action taken! Coordinates (" + str(x) + "," + str(y) + ")")
+            device_x, device_y = int(x), int(y)
+            self.connected_device.touch(device_x, device_y, MonkeyDevice.DOWN_AND_UP)
+            print("Action taken! Coordinates (" + str(device_x) + "," + str(device_y) + ")")
 
     def gather_observation(self):
         """
         Take a screenshot of the device and add the image bytes (png format) into the observation buffer.
         """
+
         device_image = self.connected_device.takeSnapshot()
 
         img_bytes = device_image.convertToBytes().tostring()
@@ -93,4 +98,5 @@ class ConnectionClient:
         """
         Shutdowns the connection client.
         """
+
         self.redis_client.shutdown()

@@ -15,6 +15,7 @@ class ObservationBuffer(Buffer):
         Initialize the ObservationBuffer.
         :param redis_client: Redis client for an active connection.
         """
+
         super(ObservationBuffer, self).__init__(OBSERVATION_BUFFER_NAME, redis_client)
 
     def serialize_elem(self, elem):

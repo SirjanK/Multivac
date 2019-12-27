@@ -1,12 +1,12 @@
 class Buffer(object):
     """
-    The Buffer class abstracts away the underlying redis list containing elements.
+    The Buffer class abstracts away the underlying redis queues.
     """
 
     def __init__(self, buffer_name, redis_client):
         """
         Initialize the Buffer.
-        :param buffer_name: Name of the redis list containing the buffer.
+        :param buffer_name: Name of the redis list containing the elements of the buffer.
         :param redis_client: Redis client for an active connection.
         """
         self.buffer_name = buffer_name

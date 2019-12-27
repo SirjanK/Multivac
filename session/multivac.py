@@ -22,13 +22,14 @@ class Multivac:
         """
         Initialize the Multivac.
         :param environment_name: Name of the environment to use.
-        :param agent_name: Name of the agent being to use.
+        :param agent_name: Name of the agent to use.
         :param num_training_steps: Number of steps to take during training of the agent.
         :param num_inference_steps: Number of steps to take after training, during inference to test the agent.
         :param redis_port: Port number that the redis server is running on. This is used to set up buffer objects.
         :param image_height: Height of the observation images. This is device dependent.
         :param image_width: Width of the observation images. This is device dependent.
         """
+
         # Start Redis connection on specified port.
         self.redis_client = redis.Redis(port=redis_port)
 
@@ -42,12 +43,23 @@ class Multivac:
         self.num_inference_steps = num_inference_steps
 
     def launch(self):
+        """
+        Launch the agent on the environment. Involves two phases:
+          1. Training phase: Here, we train the agent for num_training_steps, and it is free to act on the
+             environment as it chooses.
+          2. Inference phase: Here, we test the agent for num_inference_steps. Before this, we reset the environment
+             back to its original state and gather an initial observation. Once this is complete, agent carries out
+             num_inference_steps actions on the environment. After each action, we record the observation image
+             and render it to the user.
+        """
+
         # First train the agent.
         print("Starting to train the agent.")
         self.agent.train(self.num_training_steps)
 
         print("Done training the agent.")
 
+        # Reset the environment to its initial state. This also allows us to get an initial observation image.
         print("Resetting the environment.")
         curr_obs = self.environment.reset()
 
@@ -62,7 +74,6 @@ class Multivac:
             total_reward += reward
             self.display_rendered_img(step)
 
-        print("Done, now shutting down.")
         self.redis_client.shutdown()
 
         print("FINAL TOTAL REWARD: {}".format(total_reward))
@@ -73,6 +84,7 @@ class Multivac:
         Display a rendered img from the environment.
         :param step_no: total number of steps so far.
         """
+
         rendered_img = self.environment.render(mode='rgb_array')
         plt.figure(3)
         plt.clf()

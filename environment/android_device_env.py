@@ -30,6 +30,7 @@ class AndroidDeviceEnv(gym.Env, ABC):
         :param image_height: height of the image observation in terms of num pixels
         :param image_width: width of the image observation in terms of num pixels
         """
+
         super(AndroidDeviceEnv, self).__init__()
 
         self.action_buffer = action_buffer
@@ -106,8 +107,11 @@ class AndroidDeviceEnv(gym.Env, ABC):
 
     def get_new_observation(self):
         """
-        Gather the observation object from the observation buffer and decode the image into a numpy array that aligns with the observation space.
+        Gather the observation object from the observation buffer and decode the image into a numpy array
+        that aligns with the observation space.
+        :return: np array containing the image (H x W x 3).
         """
+
         # Blocking read from the observation buffer.
         observation = self.observation_buffer.blocking_read_elem()
 
@@ -129,4 +133,5 @@ class AndroidDeviceEnv(gym.Env, ABC):
         channels (C = 3 for RGB).
         :return: float reward value.
         """
+
         raise NotImplementedError

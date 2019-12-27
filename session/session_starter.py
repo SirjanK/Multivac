@@ -2,7 +2,8 @@
 This is the starter script to launch a Multivac session. This entails two things:
   1. Starting a connection client with an Android device
   2. Starting a Multivac environment and agent to interface with the device
-For list of parameters required, run `python -h session_starter.py`.
+For list of parameters required, run `python session/session_starter.py -h`.
+Run this script from the Multivac project directory.
 """
 
 
@@ -24,7 +25,7 @@ OBSERVATION_DELTA = "observation-delta"
 ENVIRONMENT_NAME = "environment-name"
 AGENT_NAME = "agent-name"
 
-# Fixed paths
+# Fixed path
 CONNECTION_CLIENT_STARTER_SCRIPT_PATH = "device/connection_client_starter.py"
 
 DEFAULT_REDIS_PORT = 6379
@@ -49,8 +50,8 @@ def start_redis_db():
 def start_connection_client(monkeyrunner_path, redispy_path, redis_port, observation_delta):
     """
     Starts the connection client by invoking the starter script with appropriate parameters.
-    :param monkeyrunner_path: Path to the monkeyrunner script.
-    :param redispy_path: Path to modified redis py library that is compatible with jython 2.5.
+    :param monkeyrunner_path: Local path to the monkeyrunner bin.
+    :param redispy_path: Local path to modified redis py library that is compatible with jython 2.5.
     :param redis_port: Port that the redis server is running in.
     :param observation_delta: Time interval between observations.
     :return Popen object corresponding to the process running the connection client.
@@ -66,7 +67,7 @@ def start_connection_client(monkeyrunner_path, redispy_path, redis_port, observa
 def parse_args():
     """
     Parse cmd line arguments.
-    :return: arguments that are accessible as args[PARAM_NAME]
+    :return: arguments that are accessible as args.PARAM_NAME
     """
     parser = argparse.ArgumentParser()
 
@@ -96,6 +97,7 @@ if __name__ == '__main__':
     # Start Redis DB
     redis_process = start_redis_db()
 
+    # Once this script terminates, redis_process should terminate as well.
     atexit.register(lambda: redis_process.terminate())
 
     # Start connection client
@@ -106,6 +108,7 @@ if __name__ == '__main__':
         observation_delta=params.observation_delta
     )
 
+    # Once this script terminates, device_process should terminate as well.
     atexit.register(lambda: device_process.terminate())
 
     # Run the Multivac

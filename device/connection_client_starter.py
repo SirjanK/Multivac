@@ -10,17 +10,16 @@ import atexit
 import os
 import sys
 
+assert(len(sys.argv) == 4, 'Three arguments required.')
 redispy_path, redis_port, observation_delta = sys.argv[1:]
 
-# Add the redispy (python 2.6 version) library.
+# Add the redispy (python 2.5 compatible version) library.
 sys.path.append(redispy_path)
 
 # This is to ensure jython will have the current project in its path.
 sys.path.append(os.getcwd())
 
 from device.connection_client import ConnectionClient
-
-assert(len(sys.argv) == 4, 'Three arguments required.')
 
 # Initialize the connection client.
 client = ConnectionClient(int(redis_port), int(observation_delta))

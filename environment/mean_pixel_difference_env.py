@@ -13,6 +13,7 @@ class MeanPixelDifferenceEnv(AndroidDeviceEnv):
         channels (C = 3 for RGB).
         :return: float reward value.
         """
+
         image_diff = np.absolute(new_observation - self.most_recent_observation)
 
         return np.mean(image_diff)

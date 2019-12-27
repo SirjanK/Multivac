@@ -14,6 +14,7 @@ class BaseAndroidAgent(ABC):
         Initialize the agent.
         :param env: AndroidDeviceEnv instance this agent will act on.
         """
+
         assert isinstance(env, AndroidDeviceEnv), \
             'Agent must be initialized with an environment that is an instance of AndroidDeviceEnv.'
 
@@ -24,6 +25,7 @@ class BaseAndroidAgent(ABC):
         Train the agent.
         :param num_steps: number of steps to train.
         """
+
         raise NotImplementedError
 
     def predict(self, obs):
@@ -32,4 +34,5 @@ class BaseAndroidAgent(ABC):
         :param obs: observation image.
         :return: action instance (Box)
         """
+
         raise NotImplementedError

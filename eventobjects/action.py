@@ -10,8 +10,10 @@ class Action(object):
         """
         Initializes the Action object.
         :param click_coordinate: tuple of (x, y) coordinates on the screen.
-        :param is_reset_action: flag to indicate whether this action is a 'reset' action (return device to initial state)
+        :param is_reset_action: flag to indicate whether this action is a 'reset' action
+        (return device to initial state)
         """
+
         self.click_coordinate = click_coordinate
         self.is_reset_action = is_reset_action
 
@@ -20,6 +22,7 @@ class Action(object):
         Serialize the given action object to a string.
         :return: string representation of the action.
         """
+
         return pickle.dumps(self, protocol=2)
 
     @staticmethod
@@ -29,6 +32,7 @@ class Action(object):
         :param str_repr: String representation of an action.
         :return: Action object.
         """
+
         return pickle.loads(str_repr)
 
 
