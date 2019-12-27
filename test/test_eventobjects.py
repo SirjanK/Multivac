@@ -3,18 +3,12 @@ from eventobjects.observation import Observation
 
 
 def test_action():
-    """
-    Simple tests for Action serialization and deserialization.
-    """
     helper_test_action_with_ground_truth((12, 20))
     helper_test_action_with_ground_truth((112, 2342342))
     helper_test_action_with_ground_truth((35532423, 345345345))
 
 
 def test_observation():
-    """
-    Simple tests for Observation serialization and deserialization.
-    """
     helper_test_observation_with_ground_truth("adfasfasfasfasf")
     helper_test_observation_with_ground_truth("")
     helper_test_observation_with_ground_truth("34324324324121jkjlkf23k4h24hlkl2k3h4lkh324lh24lkj2")
