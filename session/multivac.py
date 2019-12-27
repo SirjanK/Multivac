@@ -7,8 +7,9 @@ from buffers.observation_buffer import ObservationBuffer
 from environment.environment_registry import ENVIRONMENTS
 
 
-DEFAULT_IMAGE_HEIGHT = 100
-DEFAULT_IMAGE_WIDTH = 50
+# These are the defaults for the Pixel 2 Emulator.
+DEFAULT_IMAGE_HEIGHT = 1920
+DEFAULT_IMAGE_WIDTH = 1080
 
 
 class Multivac:
@@ -53,16 +54,29 @@ class Multivac:
         print("Starting to carry out inference for the agent.")
 
         total_reward = 0.0
-        for step in range(self.num_inference_steps):
+        self.display_rendered_img(0)
+
+        for step in range(1, self.num_inference_steps + 1):
             action = self.agent.predict(curr_obs)
             curr_obs, reward, info = self.environment.step(action)
-            rendered_img = self.environment.render()
             total_reward += reward
-
-            plt.imshow(rendered_img)
+            self.display_rendered_img(step)
 
         print("Done, now shutting down.")
         self.redis_client.shutdown()
 
         print("FINAL TOTAL REWARD: {}".format(total_reward))
         print("FINAL AVERAGE REWARD: {}".format(total_reward / self.num_inference_steps))
+
+    def display_rendered_img(self, step_no):
+        """
+        Display a rendered img from the environment.
+        :param step_no: total number of steps so far.
+        """
+        rendered_img = self.environment.render(mode='rgb_array')
+        plt.figure(3)
+        plt.clf()
+        plt.imshow(rendered_img)
+        plt.title("%s | Step: %d" % ("MULTIVAC", step_no))
+        plt.axis('off')
+        plt.pause(0.05)

@@ -75,7 +75,7 @@ class ConnectionClient:
             self.connected_device = MonkeyRunner.waitForConnection()
         else:
             x, y = action.click_coordinate
-            self.connected_device.touch(x, y, MonkeyDevice.DOWN_AND_UP)
+            self.connected_device.touch(int(x), int(y), MonkeyDevice.DOWN_AND_UP)
             print("Action taken! Coordinates (" + str(x) + "," + str(y) + ")")
 
     def gather_observation(self):
@@ -84,10 +84,10 @@ class ConnectionClient:
         """
         device_image = self.connected_device.takeSnapshot()
 
-        observation = Observation(device_image.convertToBytes("png"))
-        self.observation_buffer.put_elem(observation)
+        img_bytes = device_image.convertToBytes().tostring()
 
-        print("Image added to the observation buffer")
+        observation = Observation(img_bytes)
+        self.observation_buffer.put_elem(observation)
 
     def shutdown(self):
         """

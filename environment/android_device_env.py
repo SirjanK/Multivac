@@ -2,7 +2,7 @@ import gym
 import numpy as np
 
 from abc import ABC
-from io import StringIO
+from io import BytesIO
 from PIL import Image
 
 from eventobjects.action import Action, RESET_ACTION
@@ -39,10 +39,10 @@ class AndroidDeviceEnv(gym.Env, ABC):
         # This is set to None initially. It is set in either the step() or reset() fn and is used during rendering.
         self.most_recent_observation = None
 
-        # 2D continuous grid
+        # 2D continuous grid. Each action corresponds to a (x, y) touch.
         self.action_space = gym.spaces.Box(
             low=np.array([0.0, 0.0]),
-            high=np.array([image_height, image_width]),
+            high=np.array([image_width, image_height]),
             dtype=np.float32
         )
 
@@ -96,7 +96,7 @@ class AndroidDeviceEnv(gym.Env, ABC):
         return self.most_recent_observation
 
     def render(self, mode='human'):
-        if not self.most_recent_observation:
+        if self.most_recent_observation is None:
             raise Exception("most_recent_observation has not been set to a valid image. " +
                             "Most likely cause is neither step() nor reset() has been called in advance.")
         if mode == 'rgb_array':
@@ -112,11 +112,9 @@ class AndroidDeviceEnv(gym.Env, ABC):
         observation = self.observation_buffer.blocking_read_elem()
 
         # Decode image bytes into a numpy array.
-        pil_image = Image.open(StringIO(observation.image_bytes))
+        pil_image = Image.open(BytesIO(observation.image_bytes)).convert('RGB')
 
         image_arr = np.array(pil_image)
-
-        print("IMAGE SHAPE: {}".format(image_arr.shape))  # TODO: remove
 
         return image_arr
 
