@@ -12,7 +12,7 @@ space is simply a screenshot of the screen once the action has been taken. The r
 and design of the agent? That's left to experimentation. The project is called Multivac: a name found in
 Isaac Asimov's [The Last Question](http://www.physics.princeton.edu/ph115/LQ.pdf).
 
-Below is an example of a screen that a "random" agent lands on after 50 actions. This agent each step simply takes a coordinate uniformly at random.
+Below is an example of a screen that a "random" agent lands on after 50 actions. This agent each step simply samples a coordinate uniformly at random.
 
 <img src="images/example_screenshot.png" width="200">
 
