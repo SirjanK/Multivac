@@ -54,15 +54,49 @@ python session/session_starter.py --monkeyrunner-path $MONKEYRUNNER_PATH --redis
 ```
 
 ## Design
+The infrastructure behind this project involved putting together puzzle pieces
+that initially were not meant to be put together. [monkeyrunner](https://developer.android.com/studio/test/monkeyrunner)
+is a tool meant for Android developers to automate testing of applications (as per the name). 
+OpenAI's [Gym](https://gym.openai.com/) is a common interface for reinforcement learning
+environments so that a variety of RL tools and agents can be seamlessly integrated right
+off the bat. The fundamental problem is that the low level component of `monkeyrunner` and
+the Android device all run on the JVM, specifically `jython`. On the other hand, Gym 
+and the algorithms that the agents use will best be suited for `python3.*` with scientific `C`
+libraries like `numpy` and `tensorflow`. A bridge between the two is not immediately clear.
+![Multivac and the Monkey are incompatible](images/MultivacInfraStart.png)
+
+The solution we propose is to treat the two components as two parallel processes.
+We term the process that runs `monkeyrunner` as the Monkey Process. It is in charge
+of placing down and up touch actions on the device/emulator along with taking screenshots.
+The process that runs the Gym environment along with the agents that come up with educated 
+decisions as the Multivac Process. The Multivac is the brains behind the operations while
+the Monkey carries the actions out. However, the communication bridge between the two is still not immediately
+clear.
+![No bridge between Multivac and the Monkey](images/MultivacInfraBridge.png)
+
+We utilize [Redis](https://redis.io/), specifically [redispy](https://github.com/andymccurdy/redis-py)
+in order to implement this communication bridge. Taking advantage of the fact that 
+`jython` can adopt `python` compatible data structures, we abstract notions of 
+`Action` (2 dim float coordinates) and `Observation` (image bytes) data structures.
+Furthermore, we introduce the notion of an `ActionBuffer` and `ObservationBuffer`. These
+abstract away underlying redis queues part of the same redis client. The flow is as follows:
+1. The Multivac process comes up with an `action` to take. In the `step()` fn of 
+   the `Gym` subclass, this `action` is placed into the `ActionBuffer`.
+2. The Monkey process carries out a blocking read on the `ActionBuffer`. Once an `action`
+   arrives, it parses out the contents and takes that action on the device.
+3. After a predefined amount of time, termed `observation_delta`, the Monkey process
+   takes a screenshot of the device and wraps the bytes into an `Observation` object.
+   It places this `observation` into the `ObservationBuffer`.
+4. The Multivac, still in the `step()` fn has placed a blocking read on the `ObservationBuffer`.
+   Once an `observation` arrives, it computes a reward and returns.
+Steps 1-4 all happen in the duration of one `step()` call of the Gym environment
+within the Multivac process. Once 4 ends, the Multivac will make its next decision,
+and the cycle continues. In a clean fashion, the Multivac instructs the Monkey on
+what to do, and the Monkey continually supplies observations for the Multivac to make
+decisions.
+![Multivac, Monkey, and the buffers](images/MultivacInfraFinal.png)
+
 ## Current Rewards and Agents
 WIP
 
 Current basic reward is the mean absolute pixel difference between successive frames.
-
-## Contributing
-We encourage contributing to improve the current infrastructure along with making
-it more robust.
-
-As mentioned in the `Quickstart` section, next step is to dockerize this environment
-which will simplify a lot of steps necessary. For the time being, once any changes are made,
-run all the tests in the `test` directory using the setup `python3.5` virtual environment.
