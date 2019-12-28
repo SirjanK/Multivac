@@ -12,7 +12,9 @@ space is simply a screenshot of the screen once the action has been taken. The r
 and design of the agent? That's left to experimentation. The project is called Multivac: a name found in
 Isaac Asimov's [The Last Question](http://www.physics.princeton.edu/ph115/LQ.pdf).
 
-![Example screen after a "random" agent takes 50 uniformly random clicks on the screen](images/example_screenshot.png)
+Below is an example of a screen that a "random" agent lands on after 50 actions. This agent each step simply takes a coordinate uniformly at random.
+
+<img src="images/example_screenshot.png" width="200">
 
 ## Quickstart
 Current setup is involved and assumes familiarity with the Android SDK; we are 
