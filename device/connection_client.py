@@ -67,15 +67,15 @@ class ConnectionClient:
 
         if action.is_reset_action:
             # Reboot device if the action specified is 'reset'
-            self.connected_device.reboot("None")
+            # self.connected_device.reboot("None")
 
             print("Action taken! This is a reset action causing device reboot")
 
             # Custom sleep for a longer period of time since reboot may take a while
-            time.sleep(self.REBOOT_TIME)
+            # time.sleep(self.REBOOT_TIME)
 
             # Reconnect device
-            self.connected_device = MonkeyRunner.waitForConnection()
+            # self.connected_device = MonkeyRunner.waitForConnection()
         else:
             x, y = action.click_coordinate
             device_x, device_y = int(x), int(y)
