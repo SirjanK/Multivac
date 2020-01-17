@@ -55,6 +55,10 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)" &&
 python session/session_starter.py --monkeyrunner-path $MONKEYRUNNER_PATH --redispy-path $REDISPY_PATH --environment-name MeanPixelDifferenceEnv --agent-name random --num-train-steps 10 --num-inference-steps 50 --observation-delta 1000
 ```
 
+Once complete, a `mp4` file will be written to disk containing a recording, specifically
+located at `./out/<agent-name>-<environment-name>`. Furthermore, if you want to specify
+different fps for the recording, you can do so via cmd line argument `--video-fps`.
+
 ## Design
 The infrastructure behind this project involved putting together puzzle pieces
 that initially were not meant to be put together. [monkeyrunner](https://developer.android.com/studio/test/monkeyrunner)
