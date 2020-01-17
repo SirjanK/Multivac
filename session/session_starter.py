@@ -127,5 +127,9 @@ if __name__ == '__main__':
 
     multivac.launch()
 
+    # Terminate the device process
+    device_process.terminate()
+
     # Flush DB once finished
+    redis_process.terminate()
     flush_redis_db()
