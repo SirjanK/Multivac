@@ -24,6 +24,7 @@ NUM_INFERENCE_STEPS = "num-inference-steps"
 OBSERVATION_DELTA = "observation-delta"
 ENVIRONMENT_NAME = "environment-name"
 AGENT_NAME = "agent-name"
+VIDEO_FPS = "video-fps"
 
 # Fixed path
 CONNECTION_CLIENT_STARTER_SCRIPT_PATH = "device/connection_client_starter.py"
@@ -84,6 +85,9 @@ def parse_args():
                         help="Number of steps to take on the environment before terminating.")
     parser.add_argument('--' + OBSERVATION_DELTA, type=int, required=False, default=1000,
                         help="Time to wait in milliseconds after taking an action in order to take a screenshot")
+    parser.add_argument('--' + VIDEO_FPS, type=int, required=False, default=1,
+                        help="Frame per second of the output recording of the gym environment. " +
+                             "Each frame will be one observation image.")
 
     return parser.parse_args()
 
@@ -117,12 +121,13 @@ if __name__ == '__main__':
         params.agent_name,
         params.num_train_steps,
         params.num_inference_steps,
-        DEFAULT_REDIS_PORT
+        DEFAULT_REDIS_PORT,
+        video_fps=params.video_fps
     )
 
     multivac.launch()
 
-    # Terminate connection client once finished.
+    # Terminate the device process
     device_process.terminate()
 
     # Flush DB once finished
