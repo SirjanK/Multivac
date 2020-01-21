@@ -10,7 +10,6 @@ Run this script from the Multivac project directory.
 import argparse
 import atexit
 import subprocess
-import time
 
 from agents.agent_registry import AGENTS
 from environment.environment_registry import ENVIRONMENTS
@@ -32,8 +31,6 @@ DISPLAY_VIDEO = "display-video"
 CONNECTION_CLIENT_STARTER_SCRIPT_PATH = "device/connection_client_starter.py"
 
 DEFAULT_REDIS_PORT = 6379
-
-SHUTDOWN_TIME = 2
 
 
 def flush_redis_db():
