@@ -21,7 +21,7 @@ class ConnectionClient:
     # Time in seconds to wait to screenshot if a reset action is taken.
     REBOOT_TIME = 10
 
-    def __init__(self, redis_port, observation_delta=1000):
+    def __init__(self, redis_port, observation_delta=250):
         """
         Initialize the client. Verify connection with the device and setup the two buffers.
         :param redis_port: Port to start the redis connection.
@@ -51,13 +51,17 @@ class ConnectionClient:
         and takes a screenshot of the device.
         """
 
-        while True:
-            action = self.action_buffer.blocking_read_elem()
-            self.take_action(action)
+        try:
+            while True:
+                action = self.action_buffer.blocking_read_elem()
+                self.take_action(action)
 
-            time.sleep(self.observation_delta)
+                time.sleep(self.observation_delta)
 
-            self.gather_observation()
+                self.gather_observation()
+        except redis.connection.ConnectionError:
+            self.redis_client.shutdown()
+            print("Redis has been terminated, connection client is shut down.")
 
     def take_action(self, action):
         """
@@ -92,11 +96,5 @@ class ConnectionClient:
         img_bytes = device_image.convertToBytes().tostring()
 
         observation = Observation(img_bytes)
+
         self.observation_buffer.put_elem(observation)
-
-    def shutdown(self):
-        """
-        Shutdowns the connection client.
-        """
-
-        self.redis_client.shutdown()

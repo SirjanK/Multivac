@@ -8,6 +8,7 @@ It is best to call this using `session_starter.py`.
 
 import atexit
 import os
+import signal
 import sys
 
 assert(len(sys.argv) == 4, 'Three arguments required.')
@@ -24,6 +25,13 @@ from device.connection_client import ConnectionClient
 # Initialize the connection client.
 client = ConnectionClient(int(redis_port), int(observation_delta))
 
-atexit.register(lambda: client.shutdown())
 
+# Gracefully exit on the SIGTERM signal. This is usually sent by the parent process.
+def on_terminate(signum, stack):
+    print("Connection client shutting down.")
+
+
+signal.signal(signal.SIGTERM, on_terminate)
+
+# Start the connection client.
 client.start()

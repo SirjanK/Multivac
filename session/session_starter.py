@@ -10,6 +10,7 @@ Run this script from the Multivac project directory.
 import argparse
 import atexit
 import subprocess
+import time
 
 from agents.agent_registry import AGENTS
 from environment.environment_registry import ENVIRONMENTS
@@ -25,11 +26,14 @@ OBSERVATION_DELTA = "observation-delta"
 ENVIRONMENT_NAME = "environment-name"
 AGENT_NAME = "agent-name"
 VIDEO_FPS = "video-fps"
+DISPLAY_VIDEO = "display-video"
 
 # Fixed path
 CONNECTION_CLIENT_STARTER_SCRIPT_PATH = "device/connection_client_starter.py"
 
 DEFAULT_REDIS_PORT = 6379
+
+SHUTDOWN_TIME = 2
 
 
 def flush_redis_db():
@@ -83,11 +87,12 @@ def parse_args():
                         help="Number of steps to take on the environment during training.")
     parser.add_argument('--' + NUM_INFERENCE_STEPS, type=int, required=True,
                         help="Number of steps to take on the environment before terminating.")
-    parser.add_argument('--' + OBSERVATION_DELTA, type=int, required=False, default=1000,
+    parser.add_argument('--' + OBSERVATION_DELTA, type=int, required=False, default=250,
                         help="Time to wait in milliseconds after taking an action in order to take a screenshot")
     parser.add_argument('--' + VIDEO_FPS, type=int, required=False, default=1,
                         help="Frame per second of the output recording of the gym environment. " +
                              "Each frame will be one observation image.")
+    parser.add_argument('--' + DISPLAY_VIDEO, default=False, action='store_true')
 
     return parser.parse_args()
 
@@ -101,9 +106,6 @@ if __name__ == '__main__':
     # Start Redis DB
     redis_process = start_redis_db()
 
-    # Once this script terminates, redis_process should terminate as well.
-    atexit.register(lambda: redis_process.terminate())
-
     # Start connection client
     device_process = start_connection_client(
         monkeyrunner_path=params.monkeyrunner_path,
@@ -112,24 +114,24 @@ if __name__ == '__main__':
         observation_delta=params.observation_delta
     )
 
-    # Once this script terminates, device_process should terminate as well.
-    atexit.register(lambda: device_process.terminate())
-
-    # Run the Multivac
+    # Set up the Multivac
     multivac = Multivac(
         params.environment_name,
         params.agent_name,
         params.num_train_steps,
         params.num_inference_steps,
         DEFAULT_REDIS_PORT,
-        video_fps=params.video_fps
+        video_fps=params.video_fps,
+        display_video=params.display_video
     )
 
+    # Once this script terminates in any way, redis_process and device_process should terminate as well.
+    def on_terminate():
+        device_process.terminate()
+        redis_process.terminate()
+        flush_redis_db()
+
+    atexit.register(on_terminate)
+
+    # Launch the Multivac.
     multivac.launch()
-
-    # Terminate the device process
-    device_process.terminate()
-
-    # Flush DB once finished
-    redis_process.terminate()
-    flush_redis_db()
