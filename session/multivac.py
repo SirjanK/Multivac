@@ -26,14 +26,13 @@ class Multivac:
     """
     The Multivac class starts an environment and an agent in that environment.
     """
-    def __init__(self, environment_name, agent_name, num_training_steps, num_inference_steps, redis_port,
-                 image_height=DEFAULT_IMAGE_HEIGHT, image_width=DEFAULT_IMAGE_WIDTH, video_fps=1, display_video=False):
+    def __init__(self, environment_name, agent_name, num_steps, redis_port, image_height=DEFAULT_IMAGE_HEIGHT,
+                 image_width=DEFAULT_IMAGE_WIDTH, video_fps=1, display_video=False):
         """
         Initialize the Multivac.
         :param environment_name: Name of the environment to use.
         :param agent_name: Name of the agent to use.
-        :param num_training_steps: Number of steps to take during training of the agent.
-        :param num_inference_steps: Number of steps to take after training, during inference to test the agent.
+        :param num_steps: Number of steps to take on the environment.
         :param redis_port: Port number that the redis server is running on. This is used to set up buffer objects.
         :param image_height: Height of the observation images. This is device dependent.
         :param image_width: Width of the observation images. This is device dependent.
@@ -51,8 +50,7 @@ class Multivac:
         self.environment = ENVIRONMENTS[environment_name](action_buffer, observation_buffer, image_height, image_width)
         self.agent = AGENTS[agent_name](self.environment)
 
-        self.num_training_steps = num_training_steps
-        self.num_inference_steps = num_inference_steps
+        self.num_steps = num_steps
 
         self.display_video = display_video
 
@@ -76,20 +74,12 @@ class Multivac:
 
     def launch(self):
         """
-        Launch the agent on the environment. Involves two phases:
-          1. Training phase: Here, we train the agent for num_training_steps, and it is free to act on the
-             environment as it chooses.
-          2. Inference phase: Here, we test the agent for num_inference_steps. Before this, we reset the environment
-             back to its original state and gather an initial observation. Once this is complete, agent carries out
-             num_inference_steps actions on the environment. After each action, we record the observation image
-             and render it to the user. At the end of the inference phase, we write the resulting video to disk.
+        Launch the agent on the environment.
+
+        First, we reset the environment back to its original state and gather an initial observation.
+        Once this is complete, the agent carries out num_steps actions on the environment. After each action,
+        we record the observation image and render it to the user. At the end, we write the resulting video to disk.
         """
-
-        # First train the agent.
-        print("Starting to train the agent.")
-        self.agent.train(self.num_training_steps)
-
-        print("Done training the agent.")
 
         # Reset the environment to its initial state. This also allows us to get an initial observation image.
         print("Resetting the environment.")
@@ -100,14 +90,14 @@ class Multivac:
         total_reward = 0.0
         self.process_rendered_img(0, total_reward)
 
-        for step in range(1, self.num_inference_steps + 1):
-            action = self.agent.predict(curr_obs)
+        for step in range(1, self.num_steps + 1):
+            action = self.agent.take_action(curr_obs)
             curr_obs, reward, info = self.environment.step(action)
             total_reward += reward
             self.process_rendered_img(step, total_reward / step)
 
         print("FINAL TOTAL REWARD: {}".format(total_reward))
-        print("FINAL AVERAGE REWARD: {}".format(total_reward / self.num_inference_steps))
+        print("FINAL AVERAGE REWARD: {}".format(total_reward / self.num_steps))
 
         self.video_writer.release()
 

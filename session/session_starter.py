@@ -19,8 +19,7 @@ from session.multivac import Multivac
 MONKEYRUNNER_PATH = "monkeyrunner-path"
 REDISPY_PATH = "redispy-path"
 MULTIVAC_VERSION = "multivac-version"
-NUM_TRAIN_STEPS = "num-train-steps"
-NUM_INFERENCE_STEPS = "num-inference-steps"
+NUM_STEPS = "num-steps"
 OBSERVATION_DELTA = "observation-delta"
 ENVIRONMENT_NAME = "environment-name"
 AGENT_NAME = "agent-name"
@@ -80,9 +79,7 @@ def parse_args():
                         help="Name of the environment to start")
     parser.add_argument('--' + AGENT_NAME, type=str, required=True, choices=AGENTS.keys(),
                         help="Name of the agent to use")
-    parser.add_argument('--' + NUM_TRAIN_STEPS, type=int, required=True,
-                        help="Number of steps to take on the environment during training.")
-    parser.add_argument('--' + NUM_INFERENCE_STEPS, type=int, required=True,
+    parser.add_argument('--' + NUM_STEPS, type=int, required=True,
                         help="Number of steps to take on the environment before terminating.")
     parser.add_argument('--' + OBSERVATION_DELTA, type=int, required=False, default=250,
                         help="Time to wait in milliseconds after taking an action in order to take a screenshot")
@@ -115,8 +112,7 @@ if __name__ == '__main__':
     multivac = Multivac(
         params.environment_name,
         params.agent_name,
-        params.num_train_steps,
-        params.num_inference_steps,
+        params.num_steps,
         DEFAULT_REDIS_PORT,
         video_fps=params.video_fps,
         display_video=params.display_video

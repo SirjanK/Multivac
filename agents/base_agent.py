@@ -6,7 +6,7 @@ from environment.android_device_env import AndroidDeviceEnv
 class BaseAndroidAgent(ABC):
     """
     Base agent that provides a very simple interface: take in an environment that is an instance
-    of AndroidDeviceEnv, and provide a `train()` and `predict()` function.
+    of AndroidDeviceEnv, and provide a `take_action()` function.
     """
 
     def __init__(self, env):
@@ -20,15 +20,7 @@ class BaseAndroidAgent(ABC):
 
         self.env = env
 
-    def train(self, num_steps):
-        """
-        Train the agent.
-        :param num_steps: number of steps to train.
-        """
-
-        raise NotImplementedError
-
-    def predict(self, obs):
+    def take_action(self, obs):
         """
         Predict next action to take on the environment.
         :param obs: observation image.
