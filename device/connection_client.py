@@ -98,3 +98,12 @@ class ConnectionClient:
         observation = Observation(img_bytes)
 
         self.observation_buffer.put_elem(observation)
+
+    def shutdown(self):
+        """
+        Shutdown the connection client.
+        """
+        print("Connection client shutting down.")
+
+        # Kill any monkey processes running on the device. This is required due to a bug in monkeyrunner itself
+        self.connected_device.shell('killall com.android.commands.monkey')

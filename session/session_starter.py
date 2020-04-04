@@ -94,9 +94,6 @@ def parse_args():
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--' + MONKEYRUNNER_PATH, type=str, required=True,
-                        help="Local filepath to installed monkeyrunner cmd")
-    parser.add_argument('--' + REDISPY_PATH, type=str, required=True, help="Local filepath to installed redispy source")
     parser.add_argument('--' + ENVIRONMENT_NAME, type=str, required=True, choices=ENVIRONMENTS.keys(),
                         help="Name of the environment to start")
     parser.add_argument('--' + AGENT_NAME, type=str, required=True, choices=AGENTS.keys(),

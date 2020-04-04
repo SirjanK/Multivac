@@ -9,7 +9,7 @@ environment and preliminary experiments with launching RL
 agents on an Android device. More specifically, the action space 
 is 2 dimensional continuous down and up actions on the screen; the observation
 space is simply a screenshot of the screen once the action has been taken. The reward
-and design of the agent? That's left to experimentation. The project is called Multivac: a name found in
+and design of the agent? That's left to experimentation. The project is called Multivac: a name motivated by
 Isaac Asimov's [The Last Question](http://www.physics.princeton.edu/ph115/LQ.pdf).
 
 Below is an example of a screen that a "random" agent lands on after 50 actions. This agent each step simply samples 
@@ -47,14 +47,14 @@ There are two separate environments to consider:
 from setup is activated. Then, launch the `session_starter.py` script as follows:
 ```bash
 export PYTHONPATH="${PYTHONPATH}:$(pwd)" &&
-python session/session_starter.py --environment-name $ENV_NAME --agent-name $AGENT_NAME --num-train-steps $NUM_TRAIN_STEPS --num-inference-steps $NUM_INFERENCE_STEPS --observation-delta $OBS_DELTA
+python session/session_starter.py --environment-name $ENV_NAME --agent-name $AGENT_NAME --num-steps $NUM_STEPS --observation-delta $OBS_DELTA
 ```
 For a detailed description of all the parameters, run `python session/session_starter.py -h`.
-An example to launch a random agent for `50` inference steps using a basic reward function can
+An example to launch a random agent for `50` steps using a basic reward function can
 be found below:
 ```bash
 export PYTHONPATH="${PYTHONPATH}:$(pwd)" &&
-python session/session_starter.py --environment-name MeanPixelDifferenceEnv --agent-name random --num-train-steps 10 --num-inference-steps 50 --observation-delta 1000
+python session/session_starter.py --environment-name MeanPixelDifferenceEnv --agent-name random --num-steps 50 --observation-delta 1000
 ```
 
 Once complete, a `mp4` file will be written to disk containing a recording, specifically

@@ -27,11 +27,7 @@ client = ConnectionClient(int(redis_port), int(observation_delta))
 
 
 # Gracefully exit on the SIGTERM signal. This is usually sent by the parent process.
-def on_terminate(signum, stack):
-    print("Connection client shutting down.")
-
-
-signal.signal(signal.SIGTERM, on_terminate)
+signal.signal(signal.SIGTERM, lambda signum, stack: client.shutdown())
 
 # Start the connection client.
 client.start()
