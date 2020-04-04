@@ -12,7 +12,8 @@ space is simply a screenshot of the screen once the action has been taken. The r
 and design of the agent? That's left to experimentation. The project is called Multivac: a name found in
 Isaac Asimov's [The Last Question](http://www.physics.princeton.edu/ph115/LQ.pdf).
 
-Below is an example of a screen that a "random" agent lands on after 50 actions. This agent each step simply samples a coordinate uniformly at random.
+Below is an example of a screen that a "random" agent lands on after 50 actions. This agent each step simply samples 
+a coordinate uniformly at random.
 
 <img src="images/example_screenshot.png" width="200">
 
@@ -24,35 +25,36 @@ There are two separate environments to consider:
 1. Requirements by the Gym environment and agent side.
 2. Requirements on the `jython` side regarding the process that is started using the `monkeyrunner` cmd.
 
-Step by step instructions for setup:
+### Step by Step Instructions for Setup
 1. Clone the repository locally.
 2. Set up a python3.5 virtual environment for the project and activate the environment.
 3. Install all requirements listed under `requirements.txt` to this virtualenv.
    This can be done by, `pip install -r requirements.txt`. Once this has been completed,
    setup for the Gym environment and agent side has been complete.
 4. Download the Android SDK if not already. There should be the `monkeyrunner` tool under
-   `/Sdk/tools/bin/monkeyrunner`. Note the path to the `monkeyrunner` tool,
-   denoted `$MONKEYRUNNER_PATH` hereafter.
+   `/Sdk/tools/bin/monkeyrunner`. Note the path to the `monkeyrunner` tool.
 5. Unzip the `jythonCompatibleRedis.zip` located in this repo. This zip contains
    the `redispy` version `2.10.6` source with some syntax modifications to be
-   compatible with `jython`. Note the path to the unzipped source, denoted
-   `$REDISPY_PATH` hereafter.
+   compatible with `jython`. Note the path to the unzipped source.
+6. Under the root project directory, copy the contents of `example_run_config.json` to a new file `run_config.json`.
+   Change the values for they keys `monkeyrunner_path` and `redispy_path` to the appropriate local paths from steps
+   4 and 5. Use the template in `example_run_config.json` as a guide.
    
-Now, here are the instructions for running:
+### Running a Session from Command Line
 1. Connect an Android device either through USB or open an emulated device through
    Android Studio.
 2. Ensure the current working directory is right under `Multivac/` and the virtualenv
 from setup is activated. Then, launch the `session_starter.py` script as follows:
 ```bash
 export PYTHONPATH="${PYTHONPATH}:$(pwd)" &&
-python session/session_starter.py --monkeyrunner-path $MONKEYRUNNER_PATH --redispy-path $REDISPY_PATH --environment-name $ENV_NAME --agent-name $AGENT_NAME --num-train-steps $NUM_TRAIN_STEPS --num-inference-steps $NUM_INFERENCE_STEPS --observation-delta $OBS_DELTA
+python session/session_starter.py --environment-name $ENV_NAME --agent-name $AGENT_NAME --num-train-steps $NUM_TRAIN_STEPS --num-inference-steps $NUM_INFERENCE_STEPS --observation-delta $OBS_DELTA
 ```
 For a detailed description of all the parameters, run `python session/session_starter.py -h`.
 An example to launch a random agent for `50` inference steps using a basic reward function can
 be found below:
 ```bash
 export PYTHONPATH="${PYTHONPATH}:$(pwd)" &&
-python session/session_starter.py --monkeyrunner-path $MONKEYRUNNER_PATH --redispy-path $REDISPY_PATH --environment-name MeanPixelDifferenceEnv --agent-name random --num-train-steps 10 --num-inference-steps 50 --observation-delta 1000
+python session/session_starter.py --environment-name MeanPixelDifferenceEnv --agent-name random --num-train-steps 10 --num-inference-steps 50 --observation-delta 1000
 ```
 
 Once complete, a `mp4` file will be written to disk containing a recording, specifically
