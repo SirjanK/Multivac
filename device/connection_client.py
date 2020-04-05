@@ -1,10 +1,13 @@
+import logging
 import redis
 import time
 
 from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
+from com.android.ddmlib import TimeoutException
 
 from buffers.action_buffer import ActionBuffer
 from buffers.observation_buffer import ObservationBuffer
+from device.adb_shell_cmds_manager import AdbShellCmdsManager
 from eventobjects.observation import Observation
 
 
@@ -19,7 +22,10 @@ class ConnectionClient:
     """
 
     # Time in seconds to wait to screenshot if a reset action is taken.
-    REBOOT_TIME = 10
+    RESET_TIME = 5
+
+    # Max number of times to retry taking device screenshot
+    MAX_SCREENSHOT_RETRY = 3
 
     def __init__(self, redis_port, observation_delta=250):
         """
@@ -29,9 +35,13 @@ class ConnectionClient:
         image from the device.
         """
 
-        print("Waiting for device connection.")
+        self.logger = logging.getLogger("ConnectionClient")
+        self.logger.addHandler(logging.StreamHandler())
+        self.logger.setLevel(logging.DEBUG)
+
+        self.logger.info("Waiting for device connection.")
         self.connected_device = MonkeyRunner.waitForConnection()
-        print("Device found!")
+        self.logger.info("Device found!")
 
         # Start Redis connection on specified port.
         self.redis_client = redis.Redis(port=redis_port)
@@ -41,6 +51,8 @@ class ConnectionClient:
         self.observation_buffer = ObservationBuffer(self.redis_client)
 
         self.observation_delta = observation_delta / 1000.0
+
+        self.adb_shell_cmds_manager = AdbShellCmdsManager(self.connected_device)
 
     def start(self):
         """
@@ -61,7 +73,7 @@ class ConnectionClient:
                 self.gather_observation()
         except redis.connection.ConnectionError:
             self.redis_client.shutdown()
-            print("Redis has been terminated, connection client is shut down.")
+            self.logger.info("Redis has been terminated, connection client is shut down.")
 
     def take_action(self, action):
         """
@@ -70,40 +82,49 @@ class ConnectionClient:
         """
 
         if action.is_reset_action:
-            # Reboot device if the action specified is 'reset'
-            self.connected_device.reboot("None")
+            # Reset device to its original state by closing all active applications.
+            self.adb_shell_cmds_manager.close_applications()
 
-            print("Action taken! This is a reset action causing device reboot")
+            self.logger.debug("Action taken! This is a reset action closing all open applications")
 
             # Custom sleep for a longer period of time since reboot may take a while
-            time.sleep(self.REBOOT_TIME)
-
-            # Reconnect device
-            self.connected_device = MonkeyRunner.waitForConnection()
+            time.sleep(self.RESET_TIME)
         else:
             x, y = action.click_coordinate
             device_x, device_y = int(x), int(y)
             self.connected_device.touch(device_x, device_y, MonkeyDevice.DOWN_AND_UP)
-            print("Action taken! Coordinates (" + str(device_x) + "," + str(device_y) + ")")
+            self.logger.debug("Action taken! Coordinates (" + str(device_x) + "," + str(device_y) + ")")
 
     def gather_observation(self):
         """
         Take a screenshot of the device and add the image bytes (png format) into the observation buffer.
         """
 
-        device_image = self.connected_device.takeSnapshot()
+        num_retry = 0
+        while num_retry < self.MAX_SCREENSHOT_RETRY:
+            try:
+                device_image = self.connected_device.takeSnapshot()
 
-        img_bytes = device_image.convertToBytes().tostring()
+                img_bytes = device_image.convertToBytes().tostring()
 
-        observation = Observation(img_bytes)
+                observation = Observation(img_bytes)
 
-        self.observation_buffer.put_elem(observation)
+                self.observation_buffer.put_elem(observation)
+
+                return
+            except TimeoutException:
+                self.logger.error("Taking screenshot failed. Trying again.")
+                num_retry += 1
+
+        self.logger.critical("Taking screenshot failed after max retries. Failing out.")
+        raise Exception("Taking screenshot failed.")
 
     def shutdown(self):
         """
         Shutdown the connection client.
         """
-        print("Connection client shutting down.")
+
+        self.logger.info("Connection client shutting down.")
 
         # Kill any monkey processes running on the device. This is required due to a bug in monkeyrunner itself
-        self.connected_device.shell('killall com.android.commands.monkey')
+        self.adb_shell_cmds_manager.shutdown_monkey_on_device()

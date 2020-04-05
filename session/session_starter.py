@@ -8,10 +8,12 @@ Run this script from the Multivac project directory.
 
 
 import argparse
-import atexit
 import json
 import os
+import signal
 import subprocess
+import sys
+import time
 
 from agents.agent_registry import AGENTS
 from environment.environment_registry import ENVIRONMENTS
@@ -35,6 +37,9 @@ CFG_FILE_PATH = "run_config.json"
 CONNECTION_CLIENT_STARTER_SCRIPT_PATH = "device/connection_client_starter.py"
 
 DEFAULT_REDIS_PORT = 6379
+
+# Number of seconds to sleep upon successful end to allow graceful termination of subprocesses.
+TERMINATION_TIME = 3
 
 
 def flush_redis_db():
@@ -145,6 +150,21 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
         observation_delta=observation_delta
     )
 
+    # Once this script terminates in any way, redis_process and device_process should terminate as well.
+    def terminate():
+        redis_process.terminate()
+        device_process.terminate()
+        flush_redis_db()
+
+    # Termination function on a signal.
+    def terminate_on_signal(_, __):
+        terminate()
+        sys.exit(1)
+
+    # Upon termination, invoke the terminate function.
+    signal.signal(signal.SIGINT, terminate_on_signal)
+    signal.signal(signal.SIGTERM, terminate_on_signal)
+
     # Set up the Multivac
     multivac = Multivac(
         environment_name,
@@ -155,16 +175,14 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
         display_video=display_video
     )
 
-    # Once this script terminates in any way, redis_process and device_process should terminate as well.
-    def on_terminate():
-        device_process.terminate()
-        redis_process.terminate()
-        flush_redis_db()
-
-    atexit.register(on_terminate)
-
     # Launch the Multivac.
     multivac.launch()
+
+    # Once Multivac concludes, invoke the on_terminate function
+    terminate()
+
+    # Sleep for some TERMINATION_TIME to wait for subprocesses to finish
+    time.sleep(TERMINATION_TIME)
 
 
 if __name__ == '__main__':

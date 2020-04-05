@@ -1,4 +1,5 @@
 import cv2
+import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -41,6 +42,10 @@ class Multivac:
                               execution.
         """
 
+        self.logger = logging.getLogger("Multivac")
+        self.logger.addHandler(logging.StreamHandler())
+        self.logger.setLevel(logging.DEBUG)
+
         # Start Redis connection on specified port.
         self.redis_client = redis.Redis(port=redis_port)
 
@@ -82,10 +87,10 @@ class Multivac:
         """
 
         # Reset the environment to its initial state. This also allows us to get an initial observation image.
-        print("Resetting the environment.")
+        self.logger.info("Resetting the environment.")
         curr_obs = self.environment.reset()
 
-        print("Starting to carry out steps for the agent.")
+        self.logger.info("Starting to carry out steps for the agent.")
 
         total_reward = 0.0
         self.process_rendered_img(0, total_reward)
@@ -96,8 +101,8 @@ class Multivac:
             total_reward += reward
             self.process_rendered_img(step, total_reward / step)
 
-        print("FINAL TOTAL REWARD: {}".format(total_reward))
-        print("FINAL AVERAGE REWARD: {}".format(total_reward / self.num_steps))
+        self.logger.info("FINAL TOTAL REWARD: {}".format(total_reward))
+        self.logger.info("FINAL AVERAGE REWARD: {}".format(total_reward / self.num_steps))
 
         self.video_writer.release()
 

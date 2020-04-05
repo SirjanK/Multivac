@@ -6,7 +6,6 @@ This is a starter script for the connection_client. It requires the following cm
 It is best to call this using `session_starter.py`.
 """
 
-import atexit
 import os
 import signal
 import sys
@@ -26,8 +25,18 @@ from device.connection_client import ConnectionClient
 client = ConnectionClient(int(redis_port), int(observation_delta))
 
 
+def terminate_on_signal(signum, _):
+    client.shutdown()
+
+    # Graceful exit on sigterm since this is sent from parent process.
+    if signum == signal.SIGTERM:
+        sys.exit(0)
+    else:
+        sys.exit(1)
+
+
 # Gracefully exit on the SIGTERM signal. This is usually sent by the parent process.
-signal.signal(signal.SIGTERM, lambda signum, stack: client.shutdown())
+signal.signal(signal.SIGTERM, terminate_on_signal)
 
 # Start the connection client.
 client.start()
