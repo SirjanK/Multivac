@@ -85,7 +85,7 @@ class Multivac:
         print("Resetting the environment.")
         curr_obs = self.environment.reset()
 
-        print("Starting to carry out inference for the agent.")
+        print("Starting to carry out steps for the agent.")
 
         total_reward = 0.0
         self.process_rendered_img(0, total_reward)
