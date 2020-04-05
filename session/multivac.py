@@ -52,6 +52,9 @@ class Multivac:
         action_buffer = ActionBuffer(self.redis_client)
         observation_buffer = ObservationBuffer(self.redis_client)
 
+        assert environment_name in ENVIRONMENTS, "{} is not a valid environment name".format(environment_name)
+        assert agent_name in AGENTS, "{} is not a valid agent name".format(agent_name)
+
         self.environment = ENVIRONMENTS[environment_name](action_buffer, observation_buffer, image_height, image_width)
         self.agent = AGENTS[agent_name](self.environment)
 

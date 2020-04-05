@@ -41,6 +41,8 @@ DEFAULT_REDIS_PORT = 6379
 # Number of seconds to sleep upon successful end to allow graceful termination of subprocesses.
 TERMINATION_TIME = 3
 
+MAX_VIDEO_FPS = 60
+
 
 def flush_redis_db():
     """
@@ -89,6 +91,9 @@ def parse_config_file():
     monkeyrunner_path = cfg_contents[MONKEYRUNNER_PATH]
     redispy_path = cfg_contents[REDISPY_PATH]
 
+    assert os.path.exists(monkeyrunner_path), "monkeyrunner path: {} specified in run_config.json does not exist"
+    assert os.path.exists(redispy_path), "redispy path: {} specified in run_config.json does not exist"
+
     return monkeyrunner_path, redispy_path
 
 
@@ -106,8 +111,7 @@ def parse_args():
     parser.add_argument('--' + NUM_STEPS, type=int, required=True,
                         help="Number of steps to take on the environment before terminating.")
     parser.add_argument('--' + OBSERVATION_DELTA, type=int, required=False, default=250,
-                        help="Frame per second of the output recording of the gym environment. " +
-                             "Each frame will be one observation image.")
+                        help="Delay in milliseconds to wait after an action to take screenshot.")
     parser.add_argument('--' + VIDEO_FPS, type=int, required=False, default=1,
                         help="Frame per second of the output recording of the gym environment. " +
                              "Each frame will be one observation image.")
@@ -133,6 +137,16 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
     :param display_video: Flag to determine whether or not to manually display session in a window separate from the
                           device/emulator or UI.
     """
+
+    # Input validation
+    assert type(environment_name) == str  # Other validation for environment name is done by Multivac
+    assert type(agent_name) == str  # Other validation for agent name is done by Multivac
+    assert type(num_steps) == int and num_steps > 0, "Specify an integer num_steps greater than zero"
+    assert type(observation_delta) == int and observation_delta >= 0, "Specify an integer observation_delta >= 0"
+    assert type(video_fps) == int and 1 <= video_fps <= MAX_VIDEO_FPS, \
+        "video_fps must lie between 1 and {}".format(MAX_VIDEO_FPS)
+    assert type(display_video) == bool, "display_video parameter should be a boolean"
+
     # Gather information from config file
     monkeyrunner_path, redispy_path = parse_config_file()
 
