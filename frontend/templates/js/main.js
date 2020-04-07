@@ -23,20 +23,17 @@
         var check = true;
         var alertMessage = "Invalid parameters specified:\n";
 
-        var numStepsVal = $(numSteps).val();
-        if (numStepsVal === "" || numStepsVal <= 0) {
+        if (numSteps === "" || numSteps <= 0) {
             check=false;
             alertMessage += "Number of steps must be greater than zero.\n";
         }
 
-        var observationDeltaVal = $(observationDelta).val();
-        if (observationDeltaVal === "" || observationDeltaVal < 0) {
+        if (observationDelta === "" || observationDelta < 0) {
             check=false;
             alertMessage += "Observation delta must be greater than zero.\n";
         }
 
-        var videoFpsVal = $(videoFps).val();
-        if (videoFpsVal === "" || videoFpsVal < 1) {
+        if (videoFps === "" || videoFps < 1) {
             check=false;
             alertMessage += "Video fps must be greater than or equal to 1.\n";
         }
@@ -49,24 +46,23 @@
     };
 
     /**
-     * Upon click of the form button,
-     *   i) Validate inputs
-     *   ii) Send a POST request to session endpoint with parameters from the launcher form
+     * Upon click of the form button, validate the inputs. If inputs are properly provided, return true and proceed as
+     * normal for form submission. Otherwise, raise an alert and return false to indicate form should not be submitted.
      */
-    $("#launch-btn").click(function() {
-        var environmentName = $('.validate-input input[name="environment_name"]');
-        var agentName = $('.validate-input input[name="agent_name"]');
-        var numSteps = $('.validate-input input[name="num_steps"]');
-        var observationDelta = $('.validate-input input[name="observation_delta"]');
-        var videoFps = $('.validate-input input[name="video_fps"]');
+    $("#launcher-form").submit(function(event) {
+        var environmentName = $('select[name="environmentName"]').val();
+        var agentName = $('select[name="agentName"]').val();
+        var numSteps = $('.validate-input input[name="numSteps"]').val();
+        var observationDelta = $('.validate-input input[name="observationDelta"]').val();
+        var videoFps = $('.validate-input input[name="videoFps"]').val();
 
         var alertMessage = validateInputs(numSteps, observationDelta, videoFps);
 
         if (alertMessage === "") {
-            // TODO: send POST request
-            alert("Correct inputs!");
+            return true;
         } else {
             alert(alertMessage);
+            return false;
         }
     });
 })(jQuery);

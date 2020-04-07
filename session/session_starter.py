@@ -9,15 +9,21 @@ Run this script from the Multivac project directory.
 
 import argparse
 import json
+import logging
 import os
 import signal
 import subprocess
-import sys
+import threading
 import time
 
 from agents.agent_registry import AGENTS
 from environment.environment_registry import ENVIRONMENTS
 from session.multivac import Multivac
+from session.session_status_enum import SessionStatusEnum
+
+logger = logging.getLogger("Multivac Session Starter")
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.DEBUG)
 
 # Input parameter keys.
 # From config file
@@ -48,6 +54,7 @@ def flush_redis_db():
     """
     Flush all existing data from redis to remove any pending actions and observations.
     """
+
     subprocess.run(["redis-cli", "flushall"])
 
 
@@ -56,6 +63,7 @@ def start_redis_db():
     Starts the redis DB at the default port.
     :return Popen object corresponding to the child process running the redis server.
     """
+
     redis_server_process = subprocess.Popen(["redis-server"])
     return redis_server_process
 
@@ -69,6 +77,7 @@ def start_connection_client(monkeyrunner_path, redispy_path, redis_port, observa
     :param observation_delta: Time interval between observations.
     :return Popen object corresponding to the process running the connection client.
     """
+
     connection_client_process = subprocess.Popen(
         [monkeyrunner_path, CONNECTION_CLIENT_STARTER_SCRIPT_PATH, redispy_path, str(redis_port),
          str(observation_delta)]
@@ -82,6 +91,7 @@ def parse_config_file():
     Parse the config file located at CFG_FILE_PATH; raise exception if the file does not exist.
     :return: Path to monkeyrunner executable and path to redispy library.
     """
+
     assert os.path.exists(CFG_FILE_PATH), \
         "{} cannot be found. Make sure to specify config file".format(CFG_FILE_PATH)
 
@@ -102,6 +112,7 @@ def parse_args():
     Parse cmd line arguments.
     :return: arguments that are accessible as args.PARAM_NAME
     """
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--' + ENVIRONMENT_NAME, type=str, required=True, choices=ENVIRONMENTS.keys(),
@@ -136,6 +147,7 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
     :param video_fps: Frame per second of the output recording of the gym environment.
     :param display_video: Flag to determine whether or not to manually display session in a window separate from the
                           device/emulator or UI.
+    :return SessionStatusEnum indicating how the session concluded.
     """
 
     # Input validation
@@ -171,13 +183,15 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
         flush_redis_db()
 
     # Termination function on a signal.
-    def terminate_on_signal(_, __):
-        terminate()
-        sys.exit(1)
+    # Add signal handlers when executed from the main thread, e.g. command line
+    if threading.current_thread() is threading.main_thread():
+        def terminate_on_signal(_, __):
+            logger.error("Terminating session due to SIGINT or SIGTERM signal")
+            terminate()
 
-    # Upon termination, invoke the terminate function.
-    signal.signal(signal.SIGINT, terminate_on_signal)
-    signal.signal(signal.SIGTERM, terminate_on_signal)
+        # Upon termination, invoke the terminate function.
+        signal.signal(signal.SIGINT, terminate_on_signal)
+        signal.signal(signal.SIGTERM, terminate_on_signal)
 
     # Set up the Multivac
     multivac = Multivac(
@@ -190,7 +204,12 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
     )
 
     # Launch the Multivac.
-    multivac.launch()
+    try:
+        multivac.launch()
+    except Exception as e:
+        logger.error("Multivac has thrown an exception: {}".format(e))
+        terminate()
+        return SessionStatusEnum.FAILED
 
     # Once Multivac concludes, invoke the on_terminate function
     terminate()
@@ -198,11 +217,13 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
     # Sleep for some TERMINATION_TIME to wait for subprocesses to finish
     time.sleep(TERMINATION_TIME)
 
+    return SessionStatusEnum.SUCCESS
+
 
 if __name__ == '__main__':
     params = parse_args()
 
-    start_multivac_session(
+    status = start_multivac_session(
         environment_name=params.environment_name,
         agent_name=params.agent_name,
         num_steps=params.num_steps,
@@ -210,3 +231,8 @@ if __name__ == '__main__':
         video_fps=params.video_fps,
         display_video=params.display_video
     )
+
+    if status == SessionStatusEnum.SUCCESS:
+        logger.info("Multivac session successfully completed")
+    else:
+        logger.info("Multivac session failed to complete. See logs for more details")

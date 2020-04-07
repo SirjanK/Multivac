@@ -131,10 +131,6 @@ iframe {
 	max-width: 1200px;
 }
 
-
-
-
-
 /*//////////////////////////////////////////////////////////////////
 [ Contact ]*/
 
@@ -166,7 +162,6 @@ iframe {
   padding: 42px 55px 45px 55px;
 }
 
-
 /*------------------------------------------------------------------
 [ Form ]*/
 
@@ -189,6 +184,17 @@ iframe {
   font-family: Poppins-Regular;
   font-size: 16px;
   color: #333333;
+  line-height: 1.0;
+  text-align: left;
+  padding-bottom: 44px;
+}
+
+/** [TEXT] **/
+.fixed-text-large-purple {
+  display: block;
+  font-family: Poppins-Regular;
+  font-size: 32px;
+  color: #7B1FA2;
   line-height: 1.0;
   text-align: left;
   padding-bottom: 44px;
@@ -561,8 +567,3 @@ textarea.input100 {
   color: #333333;
   line-height: 1.2;
 }
-
-
-
-
-

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Multivac Session</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->
+	<link rel="icon" type="image/png" href="templates/images/icons/favicon.ico"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="templates/vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="templates/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="templates/vendor/animate/animate.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="templates/vendor/css-hamburgers/hamburgers.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="templates/vendor/animsition/css/animsition.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="templates/vendor/select2/select2.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="templates/css/util.css">
+	<link rel="stylesheet" type="text/css" href="templates/css/main.css">
+<!--===============================================================================================-->
+</head>
+
+<body>
+	<div class="container-contact100">
+		<div class="wrap-contact100">
+            <span class="contact100-form-title">
+				Multivac Session
+			</span>
+
+			<span class="contact100-form-subtitle">
+                <b>Parameters</b>:
+				<br>
+                <ul>
+                    <li>Environment: {{ environment_name }}</li>
+					<li>Agent: {{ agent_name }}</li>
+					<li>Number of Steps: {{ num_steps }}</li>
+					<li>Observation Delta: {{ observation_delta }}</li>
+				</ul>
+			</span>
+
+			<span class="fixed-text-large-purple">
+				<b>Session is in progress</b>
+			</span>
+		</div>
+	</div>
+
+<!--===============================================================================================-->
+	<script src="templates/vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+	<script src="templates/vendor/animsition/js/animsition.min.js"></script>
+<!--===============================================================================================-->
+	<script src="templates/vendor/bootstrap/js/popper.js"></script>
+	<script src="templates/vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+	<script src="templates/vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+	<script src="templates/js/session.js"></script>
+	<script>
+        sendSessionRequest(
+        	'{{ environment_name }}',
+        	'{{ agent_name }}',
+        	'{{ num_steps }}',
+        	'{{ observation_delta }}',
+        	'{{ video_fps }}'
+        );
+	</script>
+</body>
+</html>

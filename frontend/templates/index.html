@@ -27,7 +27,7 @@
 <body>
 	<div class="container-contact100">
 		<div class="wrap-contact100">
-			<form class="contact100-form validate-form">
+			<form class="contact100-form" id="launcher-form" method="POST">
 				<span class="contact100-form-title">
                     Multivac Launcher
 				</span>
@@ -49,7 +49,7 @@
 				<div class="wrap-input100 input100-select">
 					<span class="label-input100">Environment</span>
 					<div>
-						<select class="selection-2" name="environment_name">
+						<select class="selection-2" name="environmentName">
                             {% for env_option in environment_name_options %}
 								<option>{{ env_option }}</option>
 							{% endfor %}
@@ -61,7 +61,7 @@
 				<div class="wrap-input100 input100-select">
 					<span class="label-input100">Agent</span>
 					<div>
-						<select class="selection-2" name="agent_name">
+						<select class="selection-2" name="agentName">
 							{% for agent_option in agent_name_options %}
 								<option>{{ agent_option }}</option>
 							{% endfor %}
@@ -72,23 +72,23 @@
 
 				<div class="wrap-input100 validate-input">
 					<span class="label-input100">Number of Steps</span>
-					<input class="input100" type="number" name="num_steps" placeholder=50>
+					<input class="input100" type="number" name="numSteps" placeholder=50>
 					<span class="focus-input100"></span>
 				</div>
 
 				<div class="wrap-input100 validate-input">
 					<span class="label-input100">Observation Delta</span>
-					<input class="input100" type="number" name="observation_delta" placeholder=500>
+					<input class="input100" type="number" name="observationDelta" placeholder=500>
 					<span class="focus-input100"></span>
 				</div>
 
 				<div class="wrap-input100 validate-input">
 					<span class="label-input100">Video Recording Frames per Second</span>
-					<input class="input100" type="number" name="video_fps" placeholder=2>
+					<input class="input100" type="number" name="videoFps" placeholder=2>
 					<span class="focus-input100"></span>
 				</div>
 
-				<div class="container-contact100-form-btn" id="launch-btn">
+				<div class="container-contact100-form-btn">
 					<div class="wrap-contact100-form-btn">
 						<div class="contact100-form-bgbtn"></div>
 						<button class="contact100-form-btn">
@@ -122,14 +122,6 @@
 	</script>
 <!--===============================================================================================-->
 	<script src="templates/js/main.js"></script>
-
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-23581568-13');
-</script>
 
 </body>
 </html>
