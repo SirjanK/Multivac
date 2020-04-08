@@ -1,10 +1,6 @@
-
 (function ($) {
     "use strict";
 
-
-    /*==================================================================
-    [ Focus Contact2 ]*/
     $('.input100').each(function(){
         $(this).on('blur', function(){
             if($(this).val().trim() != "") {
@@ -15,56 +11,58 @@
             }
         })    
     })
-  
-  
-    /*==================================================================
-    [ Validate ]*/
-    var name = $('.validate-input input[name="name"]');
-    var email = $('.validate-input input[name="email"]');
-    var message = $('.validate-input textarea[name="message"]');
 
-
-    $('.validate-form').on('submit',function(){
+    /**
+     * Validate inputs from the launcher form.
+     * @param numSteps: number of steps parsed from the form
+     * @param observationDelta: observation delta parsed from the form
+     * @param videoFps: video frames per second parsed from the form
+     * @return empty string if parameters are valid; otherwise nonempty string containing an alert message.
+     */
+    function validateInputs(numSteps, observationDelta, videoFps) {
         var check = true;
+        var alertMessage = "Invalid parameters specified:\n";
 
-        if($(name).val().trim() == ''){
-            showValidate(name);
+        if (numSteps === "") {
             check=false;
+            alertMessage += "Number of steps is required\n";
         }
 
-
-        if($(email).val().trim().match(/^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{1,5}|[0-9]{1,3})(\]?)$/) == null) {
-            showValidate(email);
+        if (observationDelta === "") {
             check=false;
+            alertMessage += "Observation delta is required\n";
         }
 
-        if($(message).val().trim() == ''){
-            showValidate(message);
+        if (videoFps === "") {
             check=false;
+            alertMessage += "Video fps is required\n";
         }
 
-        return check;
+        if (check) {
+            return "";
+        } else {
+            return alertMessage;
+        }
+    };
+
+    /**
+     * Upon click of the form button, validate the inputs. If inputs are properly provided, return true and proceed as
+     * normal for form submission. Otherwise, raise an alert and return false to indicate form should not be submitted.
+     */
+    $("#launcher-form").submit(function(event) {
+        var environmentName = $('select[name="environmentName"]').val();
+        var agentName = $('select[name="agentName"]').val();
+        var numSteps = $('.validate-input input[name="numSteps"]').val();
+        var observationDelta = $('.validate-input input[name="observationDelta"]').val();
+        var videoFps = $('.validate-input input[name="videoFps"]').val();
+
+        var alertMessage = validateInputs(numSteps, observationDelta, videoFps);
+
+        if (alertMessage === "") {
+            return true;
+        } else {
+            alert(alertMessage);
+            return false;
+        }
     });
-
-
-    $('.validate-form .input100').each(function(){
-        $(this).focus(function(){
-           hideValidate(this);
-       });
-    });
-
-    function showValidate(input) {
-        var thisAlert = $(input).parent();
-
-        $(thisAlert).addClass('alert-validate');
-    }
-
-    function hideValidate(input) {
-        var thisAlert = $(input).parent();
-
-        $(thisAlert).removeClass('alert-validate');
-    }
-    
-    
-
 })(jQuery);
