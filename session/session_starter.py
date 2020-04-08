@@ -18,6 +18,7 @@ import time
 
 from agents.agent_registry import AGENTS
 from environment.environment_registry import ENVIRONMENTS
+from session import static_configs
 from session.multivac import Multivac
 from session.session_status_enum import SessionStatusEnum
 
@@ -41,13 +42,6 @@ DISPLAY_VIDEO = "display-video"
 # Fixed paths
 CFG_FILE_PATH = "run_config.json"
 CONNECTION_CLIENT_STARTER_SCRIPT_PATH = "device/connection_client_starter.py"
-
-DEFAULT_REDIS_PORT = 6379
-
-# Number of seconds to sleep upon successful end to allow graceful termination of subprocesses.
-TERMINATION_TIME = 3
-
-MAX_VIDEO_FPS = 60
 
 
 def flush_redis_db():
@@ -153,10 +147,12 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
     # Input validation
     assert type(environment_name) == str  # Other validation for environment name is done by Multivac
     assert type(agent_name) == str  # Other validation for agent name is done by Multivac
-    assert type(num_steps) == int and num_steps > 0, "Specify an integer num_steps greater than zero"
-    assert type(observation_delta) == int and observation_delta >= 0, "Specify an integer observation_delta >= 0"
-    assert type(video_fps) == int and 1 <= video_fps <= MAX_VIDEO_FPS, \
-        "video_fps must lie between 1 and {}".format(MAX_VIDEO_FPS)
+    assert type(num_steps) == int and 0 < num_steps <= static_configs.MAX_NUM_STEPS, \
+        "Specify an integer num_steps greater than zero and <= {}".format(static_configs.MAX_NUM_STEPS)
+    assert type(observation_delta) == int and 0 <= observation_delta <= static_configs.MAX_OBSERVATION_DELTA, \
+        "Specify an integer observation_delta >= 0 and <= {}".format(static_configs.MAX_OBSERVATION_DELTA)
+    assert type(video_fps) == int and 1 <= video_fps <= static_configs.MAX_VIDEO_FPS, \
+        "Specify an integer video fps >= 1 and <= {}".format(static_configs.MAX_VIDEO_FPS)
     assert type(display_video) == bool, "display_video parameter should be a boolean"
 
     # Gather information from config file
@@ -172,7 +168,7 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
     device_process = start_connection_client(
         monkeyrunner_path=monkeyrunner_path,
         redispy_path=redispy_path,
-        redis_port=DEFAULT_REDIS_PORT,
+        redis_port=static_configs.DEFAULT_REDIS_PORT,
         observation_delta=observation_delta
     )
 
@@ -198,7 +194,7 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
         environment_name,
         agent_name,
         num_steps,
-        redis_port=DEFAULT_REDIS_PORT,
+        redis_port=static_configs.DEFAULT_REDIS_PORT,
         video_fps=video_fps,
         display_video=display_video
     )
@@ -215,7 +211,7 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
     terminate()
 
     # Sleep for some TERMINATION_TIME to wait for subprocesses to finish
-    time.sleep(TERMINATION_TIME)
+    time.sleep(static_configs.TERMINATION_TIME)
 
     return SessionStatusEnum.SUCCESS
 

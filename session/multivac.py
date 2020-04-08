@@ -12,6 +12,7 @@ from environment.environment_registry import ENVIRONMENTS
 
 
 # These are the defaults for the Pixel 2 Emulator.
+# TODO: dynamically determine this.
 DEFAULT_IMAGE_HEIGHT = 1920
 DEFAULT_IMAGE_WIDTH = 1080
 

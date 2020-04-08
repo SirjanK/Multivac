@@ -72,19 +72,19 @@
 
 				<div class="wrap-input100 validate-input">
 					<span class="label-input100">Number of Steps</span>
-					<input class="input100" type="number" name="numSteps" placeholder=50>
+					<input class="input100" type="number" name="numSteps" placeholder=50 min="1" max="{{ max_num_steps }}">
 					<span class="focus-input100"></span>
 				</div>
 
 				<div class="wrap-input100 validate-input">
 					<span class="label-input100">Observation Delta</span>
-					<input class="input100" type="number" name="observationDelta" placeholder=500>
+					<input class="input100" type="number" name="observationDelta" placeholder=500 min="0" max="{{ max_observation_delta }}">
 					<span class="focus-input100"></span>
 				</div>
 
 				<div class="wrap-input100 validate-input">
 					<span class="label-input100">Video Recording Frames per Second</span>
-					<input class="input100" type="number" name="videoFps" placeholder=2>
+					<input class="input100" type="number" name="videoFps" placeholder=2 min="1" max="{{ max_video_fps }}">
 					<span class="focus-input100"></span>
 				</div>
 

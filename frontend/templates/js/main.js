@@ -23,19 +23,19 @@
         var check = true;
         var alertMessage = "Invalid parameters specified:\n";
 
-        if (numSteps === "" || numSteps <= 0) {
+        if (numSteps === "") {
             check=false;
-            alertMessage += "Number of steps must be greater than zero.\n";
+            alertMessage += "Number of steps is required\n";
         }
 
-        if (observationDelta === "" || observationDelta < 0) {
+        if (observationDelta === "") {
             check=false;
-            alertMessage += "Observation delta must be greater than zero.\n";
+            alertMessage += "Observation delta is required\n";
         }
 
-        if (videoFps === "" || videoFps < 1) {
+        if (videoFps === "") {
             check=false;
-            alertMessage += "Video fps must be greater than or equal to 1.\n";
+            alertMessage += "Video fps is required\n";
         }
 
         if (check) {

@@ -11,4 +11,4 @@ class SessionStatusEnum(Enum):
     SUCCESS = 1
 
     # Failed indicates the Multivac session raised an Exception.
-    FAILED = 3
+    FAILED = 2

@@ -9,6 +9,7 @@ NUM_STEPS_KEY = 'numSteps'
 OBSERVATION_DELTA_KEY = 'observationDelta'
 VIDEO_FPS_KEY = 'videoFps'
 
-# Return values by the /session endpoint
+# Return values by the / and /session endpoints
 SUCCESS_DESIGNATION = "success"
 FAILED_DESIGNATION = "failed"
+INVALID_POST_PARAMETERS_DESIGNATION = "Invalid POST parameters"
