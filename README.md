@@ -42,7 +42,7 @@ There are two separate environments to consider:
    
 ### Running a Session from Command Line
 1. Connect an Android device either through USB or open an emulated device through
-   Android Studio.
+   Android Studio. Any device should work as the dimensions of the device are dynamically loaded!
 2. Ensure the current working directory is right under `Multivac/` and the virtualenv
 from setup is activated. Then, launch the `session_starter.py` script as follows:
 ```bash
