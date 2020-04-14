@@ -164,4 +164,7 @@ class Multivac:
 
         full_img = np.concatenate([text_img, rendered_img])
 
-        self.video_writer.write(full_img)
+        # OpenCV video writer requires image in BGR format
+        bgr_full_img = cv2.cvtColor(full_img, cv2.COLOR_RGB2BGR)
+
+        self.video_writer.write(bgr_full_img)
