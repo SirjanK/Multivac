@@ -8,13 +8,9 @@ import redis
 from agents.agent_registry import AGENTS
 from buffers.action_buffer import ActionBuffer
 from buffers.observation_buffer import ObservationBuffer
+from environment.android_device_env import AndroidDeviceEnv
 from environment.environment_registry import ENVIRONMENTS
 
-
-# These are the defaults for the Pixel 2 Emulator.
-# TODO: dynamically determine this.
-DEFAULT_IMAGE_HEIGHT = 1920
-DEFAULT_IMAGE_WIDTH = 1080
 
 # Height for text portion of the video frame.
 TEXT_HEIGHT = 100
@@ -28,16 +24,20 @@ class Multivac:
     """
     The Multivac class starts an environment and an agent in that environment.
     """
-    def __init__(self, environment_name, agent_name, num_steps, redis_port, image_height=DEFAULT_IMAGE_HEIGHT,
-                 image_width=DEFAULT_IMAGE_WIDTH, video_fps=1, display_video=False):
+
+    def __init__(self, environment_name, agent_name, num_steps, redis_port, video_fps=1, display_video=False):
         """
-        Initialize the Multivac.
+        Initialize the Multivac. This involves,
+          1. Open a redis client and setting up an action and observation buffer. This establishes an exchange
+             protocol between the Multivac and a ConnectionClient
+          2. Gather device metadata from the observation buffer
+          3. Initialize an environment and an agent in that environment
+          4. Setup the video recorder and writer
+
         :param environment_name: Name of the environment to use.
         :param agent_name: Name of the agent to use.
         :param num_steps: Number of steps to take on the environment.
         :param redis_port: Port number that the redis server is running on. This is used to set up buffer objects.
-        :param image_height: Height of the observation images. This is device dependent.
-        :param image_width: Width of the observation images. This is device dependent.
         :param video_fps: frame per second of the output video. Each frame will be one observation image.
         :param display_video: Boolean flag indicating whether or not to display the video of the Gym environment during
                               execution.
@@ -47,16 +47,32 @@ class Multivac:
         self.logger.addHandler(logging.StreamHandler())
         self.logger.setLevel(logging.DEBUG)
 
+        assert environment_name in ENVIRONMENTS, "{} is not a valid environment name".format(environment_name)
+        assert agent_name in AGENTS, "{} is not a valid agent name".format(agent_name)
+
         # Start Redis connection on specified port.
         self.redis_client = redis.Redis(port=redis_port)
 
         action_buffer = ActionBuffer(self.redis_client)
         observation_buffer = ObservationBuffer(self.redis_client)
 
-        assert environment_name in ENVIRONMENTS, "{} is not a valid environment name".format(environment_name)
-        assert agent_name in AGENTS, "{} is not a valid agent name".format(agent_name)
+        # Stall until we get the first observation from the observation buffer to gather image height and width
+        self.logger.debug("Gathering initial image from observation buffer")
+        initial_observation = observation_buffer.blocking_read_elem()
+        initial_image_from_observation = AndroidDeviceEnv.process_image_from_observation(initial_observation)
+        image_height, image_width, _ = initial_image_from_observation.shape
 
-        self.environment = ENVIRONMENTS[environment_name](action_buffer, observation_buffer, image_height, image_width)
+        self.logger.debug(
+            "Device height: {}; Device width: {}".format(image_height, image_width)
+        )
+
+        self.environment = ENVIRONMENTS[environment_name](
+            action_buffer,
+            observation_buffer,
+            image_height,
+            image_width
+        )
+
         self.agent = AGENTS[agent_name](self.environment)
 
         self.num_steps = num_steps

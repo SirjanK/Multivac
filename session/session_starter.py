@@ -189,21 +189,20 @@ def start_multivac_session(environment_name, agent_name, num_steps, observation_
         signal.signal(signal.SIGINT, terminate_on_signal)
         signal.signal(signal.SIGTERM, terminate_on_signal)
 
-    # Set up the Multivac
-    multivac = Multivac(
-        environment_name,
-        agent_name,
-        num_steps,
-        redis_port=static_configs.DEFAULT_REDIS_PORT,
-        video_fps=video_fps,
-        display_video=display_video
-    )
-
-    # Launch the Multivac.
+    # Set up and launch the Multivac
     try:
+        multivac = Multivac(
+            environment_name,
+            agent_name,
+            num_steps,
+            redis_port=static_configs.DEFAULT_REDIS_PORT,
+            video_fps=video_fps,
+            display_video=display_video
+        )
+
         multivac.launch()
     except Exception as e:
-        logger.error("Multivac has thrown an exception: {}".format(e))
+        logger.exception("Multivac has thrown an exception: {}".format(e))
         terminate()
         return SessionStatusEnum.FAILED
 
