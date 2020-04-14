@@ -30,7 +30,7 @@ class Multivac:
         Initialize the Multivac. This involves,
           1. Open a redis client and setting up an action and observation buffer. This establishes an exchange
              protocol between the Multivac and a ConnectionClient
-          2. Gather device metadata from the observation buffer
+          2. Gather an initial observation from the observation buffer to collect metadata information
           3. Initialize an environment and an agent in that environment
           4. Setup the video recorder and writer
 
@@ -56,7 +56,7 @@ class Multivac:
         action_buffer = ActionBuffer(self.redis_client)
         observation_buffer = ObservationBuffer(self.redis_client)
 
-        # Stall until we get the first observation from the observation buffer to gather image height and width
+        # Stall until we get the first observation from the observation buffer to collect metadata
         self.logger.debug("Gathering initial image from observation buffer")
         initial_observation = observation_buffer.blocking_read_elem()
         initial_image_from_observation = AndroidDeviceEnv.process_image_from_observation(initial_observation)
@@ -165,6 +165,6 @@ class Multivac:
         full_img = np.concatenate([text_img, rendered_img])
 
         # OpenCV video writer requires image in BGR format
-        bgr_full_img = cv2.cvtColor(full_img, cv2.COLOR_RGB2BGR)
+        full_img_bgr = cv2.cvtColor(full_img, cv2.COLOR_RGB2BGR)
 
-        self.video_writer.write(bgr_full_img)
+        self.video_writer.write(full_img_bgr)
