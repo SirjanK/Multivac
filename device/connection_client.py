@@ -56,14 +56,19 @@ class ConnectionClient:
 
     def start(self):
         """
-        Starts an infinite cycle of listening to the action buffer and populating the observation buffer.
+        First, send a screenshot message to the observation buffer to provide an example image response. Then,
+        start an infinite cycle of listening to the action buffer and populating the observation buffer.
         Once terminated, the shutdown function will be invoked.
 
-        Reads action from the action_buffer and applies it to the device. Then waits observation_delta milliseconds
-        and takes a screenshot of the device.
+        In each iteration, read action from the action_buffer and apply it to the device. Then wait observation_delta
+        milliseconds and take a screenshot of the device.
         """
 
         try:
+            # Initial step is to pass a screenshot into the observation buffer
+            self.logger.debug("Sending inital observation image")
+            self.gather_observation()
+
             while True:
                 action = self.action_buffer.blocking_read_elem()
                 self.take_action(action)

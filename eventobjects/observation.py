@@ -3,7 +3,7 @@ import pickle
 
 class Observation(object):
     """
-    Observation object that designates a response image of the mobile screen.
+    Observation object that designates a response from the device.
     """
 
     def __init__(self, image_bytes):

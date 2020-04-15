@@ -115,12 +115,7 @@ class AndroidDeviceEnv(gym.Env, ABC):
         # Blocking read from the observation buffer.
         observation = self.observation_buffer.blocking_read_elem()
 
-        # Decode image bytes into a numpy array.
-        pil_image = Image.open(BytesIO(observation.image_bytes)).convert('RGB')
-
-        image_arr = np.array(pil_image)
-
-        return image_arr
+        return AndroidDeviceEnv.process_image_from_observation(observation)
 
     def compute_reward(self, new_observation):
         """
@@ -135,3 +130,18 @@ class AndroidDeviceEnv(gym.Env, ABC):
         """
 
         raise NotImplementedError
+
+    @staticmethod
+    def process_image_from_observation(observation):
+        """
+        Helper static method to process an image from an observation to a numpy array
+        :param observation: Observation object
+        :return: numpy array of an RGB image contained in the observation
+        """
+
+        # Decode image bytes into a numpy array.
+        pil_image = Image.open(BytesIO(observation.image_bytes)).convert('RGB')
+
+        image_arr = np.array(pil_image)
+
+        return image_arr
